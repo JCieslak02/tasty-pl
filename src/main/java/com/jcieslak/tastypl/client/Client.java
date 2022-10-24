@@ -33,8 +33,6 @@ public class Client {
     @ToString.Exclude
     private Address address;
 
-    //TODO: orders
-
     @OneToMany(mappedBy = "client")
     private Set<Order> orders;
     @OneToOne

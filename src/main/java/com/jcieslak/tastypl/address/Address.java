@@ -1,6 +1,7 @@
 package com.jcieslak.tastypl.address;
 
 import com.jcieslak.tastypl.client.Client;
+import com.jcieslak.tastypl.restaurant.Restaurant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,6 +35,8 @@ public class Address {
     @ToString.Exclude
     private Set<Client> clients;
 
+    @OneToOne(mappedBy = "address")
+    private Restaurant restaurant;
     public Address(String country, String region, String zipCode, String city, String buildingNumber, String secondaryNumber) {
         this.country = country;
         this.region = region;
