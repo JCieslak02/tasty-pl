@@ -1,14 +1,11 @@
 package com.jcieslak.tastypl.address;
 
-import com.jcieslak.tastypl.client.Client;
-import com.jcieslak.tastypl.restaurant.Restaurant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -17,7 +14,6 @@ import java.util.Set;
 @ToString
 @Table(name="address")
 public class Address {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -31,12 +27,6 @@ public class Address {
     @Column(name="secondary_number")
     private String secondaryNumber;
 
-    @OneToMany(mappedBy = "address")
-    @ToString.Exclude
-    private Set<Client> clients;
-
-    @OneToOne(mappedBy = "address")
-    private Restaurant restaurant;
     public Address(String country, String region, String zipCode, String city, String buildingNumber, String secondaryNumber) {
         this.country = country;
         this.region = region;

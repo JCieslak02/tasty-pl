@@ -1,5 +1,6 @@
 package com.jcieslak.tastypl.order;
 
+import com.jcieslak.tastypl.address.Address;
 import com.jcieslak.tastypl.client.Client;
 import com.jcieslak.tastypl.restaurant.Restaurant;
 import lombok.Getter;
@@ -29,10 +30,15 @@ public class Order {
     private boolean isFinished;
 
     private BigDecimal price;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="client_id")
     @ToString.Exclude
     private Client client;
+
+    @ManyToOne
+    @JoinColumn(name = "address_id")
+    private Address address;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="restaurant_id")

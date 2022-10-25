@@ -1,7 +1,5 @@
 package com.jcieslak.tastypl.contact;
 
-import com.jcieslak.tastypl.client.Client;
-import com.jcieslak.tastypl.restaurant.Restaurant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,12 +19,6 @@ public class Contact {
     private int id;
     private String email;
     private String tel;
-
-    @OneToOne(mappedBy = "contact")
-    private Client client;
-
-    @OneToOne(mappedBy = "contact")
-    private Restaurant restaurant;
 
     public Contact(String email, String tel) {
         this.email = email;

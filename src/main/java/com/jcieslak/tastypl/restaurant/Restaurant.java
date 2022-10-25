@@ -2,15 +2,11 @@ package com.jcieslak.tastypl.restaurant;
 
 import com.jcieslak.tastypl.address.Address;
 import com.jcieslak.tastypl.contact.Contact;
-import com.jcieslak.tastypl.order.Order;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Fetch;
-
 import javax.persistence.*;
-import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -28,6 +24,7 @@ public class Restaurant {
 
     @Column(name = "restaurant_type")
     private String type;
+
     @OneToOne
     @JoinColumn(name = "contact_id", referencedColumnName = "id")
     private Contact contact;
@@ -35,10 +32,6 @@ public class Restaurant {
     @OneToOne
     @JoinColumn(name="address_id", referencedColumnName = "id")
     private Address address;
-
-    @OneToMany(mappedBy = "restaurant")
-    @ToString.Exclude
-    private Set<Order> orders;
 
     public Restaurant(String name, String type) {
         this.name = name;
