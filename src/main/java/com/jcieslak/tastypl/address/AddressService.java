@@ -1,5 +1,7 @@
 package com.jcieslak.tastypl.address;
 
+import com.jcieslak.tastypl.address.exception.AddressAlreadyExistsException;
+import com.jcieslak.tastypl.address.exception.AddressNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,20 +14,20 @@ public class AddressService {
 
     public Address getAddressById(Long id){
         return addressRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Address with id: " + id + " not found"));
+                .orElseThrow(() -> new AddressNotFoundException(id));
     }
 
     public List<Address> getAddresses(){
         return addressRepository.findAll();
     }
 
+    //this method is also used in updateAddress to reduce duplicate code, helps to validate new address to protect from duplicates
     public void addAddress(Address address){
         List<Address> addresses = getAddresses();
 
         for(Address foundAddresses : addresses){
             if(address.equals(foundAddresses)){
-                //TODO: create custom exception
-                throw new RuntimeException("Address already exists in db");
+                throw new AddressAlreadyExistsException();
             }
         }
 
@@ -48,6 +50,6 @@ public class AddressService {
         address.setBuildingNumber(newAddress.getBuildingNumber());
         address.setSecondaryNumber(newAddress.getSecondaryNumber());
 
-        addressRepository.save(address);
+        addAddress(address);
     }
 }

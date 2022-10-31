@@ -1,5 +1,7 @@
 package com.jcieslak.tastypl.contact;
 
+import com.jcieslak.tastypl.contact.exception.ContactHasDuplicateFieldException;
+import com.jcieslak.tastypl.contact.exception.ContactNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +14,8 @@ public class ContactService {
     private final ContactRepository contactRepository;
 
     public Contact getContactById(Long id){
-        //TODO: custom exception
         return contactRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Contact with id : " + id + " doesn't exist"));
+                .orElseThrow(() -> new ContactNotFoundException(id));
     }
 
     public List<Contact> getContacts(){
@@ -22,11 +23,11 @@ public class ContactService {
     }
 
     public void addContact(Contact contact){
-        //TODO: custom exception
-        Optional<Contact> queriedContact = contactRepository.findContactByEmail(contact.getEmail());
+        Optional<Contact> queriedByEmailContact = contactRepository.findContactByEmail(contact.getEmail());
+        Optional<Contact> queriedByTelContact = contactRepository.findContactByTel(contact.getTel());
 
-        if(queriedContact.isPresent()){
-            throw new IllegalArgumentException("This contact already exists");
+        if(queriedByEmailContact.isPresent() || queriedByTelContact.isPresent()){
+            throw new ContactHasDuplicateFieldException();
         }
 
         contactRepository.save(contact);
@@ -40,7 +41,20 @@ public class ContactService {
     public void updateContact(Long id, Contact newContact){
         Contact contact = getContactById(id);
 
+        List<Contact> allContacts = getContacts();
+
+
+        for(Contact dbContact : allContacts){
+            if(dbContact.equals(contact)) continue;
+
+            if(dbContact.getEmail().equals(newContact.getEmail()) || dbContact.getTel().equals(newContact.getTel())){
+                throw new ContactHasDuplicateFieldException();
+            }
+        }
+
         contact.setEmail(newContact.getEmail());
         contact.setTel(newContact.getTel());
+
+        contactRepository.save(contact);
     }
 }
