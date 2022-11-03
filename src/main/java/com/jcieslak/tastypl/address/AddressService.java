@@ -22,7 +22,7 @@ public class AddressService {
     }
 
     //this method is also used in updateAddress to reduce duplicate code, helps to validate new address to protect from duplicates
-    public void addAddress(Address address){
+    public Address createAddress(Address address){
         List<Address> addresses = getAddresses();
 
         for(Address foundAddresses : addresses){
@@ -31,7 +31,7 @@ public class AddressService {
             }
         }
 
-        addressRepository.save(address);
+        return addressRepository.save(address);
     }
 
     public void deleteAddress(Long id){
@@ -39,7 +39,7 @@ public class AddressService {
         addressRepository.delete(address);
     }
 
-    public void updateAddress(Long id, Address newAddress){
+    public Address updateAddress(Long id, Address newAddress){
         Address address = getAddressById(id);
 
         address.setCountry(newAddress.getCountry());
@@ -50,6 +50,6 @@ public class AddressService {
         address.setBuildingNumber(newAddress.getBuildingNumber());
         address.setSecondaryNumber(newAddress.getSecondaryNumber());
 
-        addAddress(address);
+        return createAddress(address);
     }
 }
