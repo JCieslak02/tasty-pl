@@ -1,7 +1,8 @@
 package com.jcieslak.tastypl.address;
 
-import com.jcieslak.tastypl.address.exception.AddressAlreadyExistsException;
-import com.jcieslak.tastypl.address.exception.AddressNotFoundException;
+import com.jcieslak.tastypl.exception.AlreadyExistsException;
+import com.jcieslak.tastypl.exception.HasNullFieldsException;
+import com.jcieslak.tastypl.exception.NotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -10,37 +11,46 @@ import java.util.List;
 @AllArgsConstructor
 @Service
 public class AddressService {
+    //this constant is a dum dum solution, I'll change it soon
+    public static final String ADDRESS = "address";
     private final AddressRepository addressRepository;
 
     public Address getAddressById(Long id){
         return addressRepository.findById(id)
-                .orElseThrow(() -> new AddressNotFoundException(id));
+                .orElseThrow(() -> new NotFoundException(ADDRESS, id));
     }
 
     public List<Address> getAddresses(){
         return addressRepository.findAll();
     }
 
-    //this method is also used in updateAddress to reduce duplicate code, helps to validate new address to protect from duplicates
     public Address createAddress(Address address){
-        List<Address> addresses = getAddresses();
+        boolean isDuplicate = isAddressADuplicate(address);
 
-        for(Address foundAddresses : addresses){
-            if(address.equals(foundAddresses)){
-                throw new AddressAlreadyExistsException();
-            }
-        }
+        if(isDuplicate) throw new AlreadyExistsException(ADDRESS);
 
         return addressRepository.save(address);
     }
 
     public void deleteAddress(Long id){
+        //called method takes care of not found exception
         Address address = getAddressById(id);
         addressRepository.delete(address);
     }
 
     public Address updateAddress(Long id, Address newAddress){
+        //called method takes care of not found exception
         Address address = getAddressById(id);
+
+        if(newAddress.getCountry() == null
+                || newAddress.getZipCode() == null
+                || newAddress.getCity() == null
+                || newAddress.getBuildingNumber() == null)
+        {
+            throw new HasNullFieldsException(ADDRESS);
+        }
+
+        if(isAddressADuplicate(newAddress)) throw new AlreadyExistsException(ADDRESS);
 
         address.setCountry(newAddress.getCountry());
         address.setRegion(newAddress.getRegion());
@@ -50,6 +60,18 @@ public class AddressService {
         address.setBuildingNumber(newAddress.getBuildingNumber());
         address.setSecondaryNumber(newAddress.getSecondaryNumber());
 
-        return createAddress(address);
+        return addressRepository.save(address);
+    }
+
+    private boolean isAddressADuplicate(Address address){
+        List<Address> addresses = getAddresses();
+
+        for(Address dbAddress : addresses){
+            if(dbAddress.equals(address)){
+                return true;
+            }
+        }
+
+        return false;
     }
 }
