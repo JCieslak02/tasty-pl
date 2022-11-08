@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @NoArgsConstructor
@@ -19,7 +20,7 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="first_name")
+    @Column(name="first_name", nullable = false)
     private String firstName;
 
     @Column(name="last_name")
@@ -29,8 +30,16 @@ public class Client {
     @JoinColumn(name="contact_id", referencedColumnName = "id")
     private Contact contact;
 
-    public Client(String firstName, String lastName) {
-        this.firstName = firstName;
-        this.lastName = lastName;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Client client = (Client) o;
+        return firstName.equals(client.firstName) && lastName.equals(client.lastName) && contact.equals(client.contact);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(firstName, lastName, contact);
     }
 }
