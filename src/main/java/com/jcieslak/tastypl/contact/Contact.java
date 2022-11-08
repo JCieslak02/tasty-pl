@@ -18,13 +18,10 @@ public class Contact {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false)
     private String email;
+    @Column(nullable = false)
     private String tel;
-
-    public Contact(String email, String tel) {
-        this.email = email;
-        this.tel = tel;
-    }
 
     @Override
     public boolean equals(Object o) {

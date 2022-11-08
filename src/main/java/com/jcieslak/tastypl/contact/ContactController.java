@@ -1,13 +1,15 @@
 package com.jcieslak.tastypl.contact;
 
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping(path="api/v1/contact")
+@RequestMapping(path="api/v1/contacts")
 public class ContactController {
 
     private final ContactService contactService;
@@ -18,17 +20,20 @@ public class ContactController {
     }
 
     @PostMapping
-    public void addContact(@RequestBody Contact contact){
-        contactService.addContact(contact);
+    public ResponseEntity<Contact> addContact(@RequestBody Contact contact){
+        contactService.createContact(contact);
+        return new ResponseEntity<>(contact, HttpStatus.CREATED);
     }
 
     @DeleteMapping(path = "{contactId}")
-    public void deleteContact(@PathVariable("contactId") Long id){
+    public ResponseEntity<Void> deleteContact(@PathVariable("contactId") Long id){
         contactService.deleteContact(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping(path = "{contactId}")
-    public void updateContact(@PathVariable("contactId") Long id, @RequestBody Contact contact){
+    public ResponseEntity<Contact> updateContact(@PathVariable("contactId") Long id, @RequestBody Contact contact){
         contactService.updateContact(id, contact);
+        return new ResponseEntity<>(contact, HttpStatus.OK);
     }
 }
