@@ -13,10 +13,11 @@ import java.util.List;
 public class ClientService {
     private final ClientRepository clientRepository;
     private final ContactService contactService;
+    private static final String CLIENT = "client";
 
     public Client getClientById(Long id){
         return clientRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("client", id));
+                .orElseThrow(() -> new NotFoundException(CLIENT, id));
     }
 
     public List<Client> getClients(){
