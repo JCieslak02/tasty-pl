@@ -25,6 +25,8 @@ public class AddressService {
     }
 
     public Address createAddress(Address address){
+        checkAddressForNullFields(address);
+
         boolean isDuplicate = isAddressADuplicate(address);
 
         if(isDuplicate) throw new AlreadyExistsException(ADDRESS);
@@ -42,13 +44,7 @@ public class AddressService {
         //called method takes care of not found exception
         Address address = getAddressById(id);
 
-        if(newAddress.getCountry() == null
-                || newAddress.getZipCode() == null
-                || newAddress.getCity() == null
-                || newAddress.getBuildingNumber() == null)
-        {
-            throw new HasNullFieldsException(ADDRESS);
-        }
+        checkAddressForNullFields(newAddress);
 
         if(isAddressADuplicate(newAddress)) throw new AlreadyExistsException(ADDRESS);
 
@@ -63,7 +59,18 @@ public class AddressService {
         return addressRepository.save(address);
     }
 
-    private boolean isAddressADuplicate(Address address){
+    //simply checks for fields that cant be null, if they are, it throws an exception
+    public void checkAddressForNullFields(Address address){
+        if(address.getCountry() == null
+                || address.getZipCode() == null
+                || address.getCity() == null
+                || address.getBuildingNumber() == null)
+        {
+            throw new HasNullFieldsException(ADDRESS);
+        }
+    }
+
+    public boolean isAddressADuplicate(Address address){
         List<Address> addresses = getAddresses();
 
         for(Address dbAddress : addresses){

@@ -1,6 +1,7 @@
 package com.jcieslak.tastypl.contact;
 
 import com.jcieslak.tastypl.exception.HasNonUniqueFieldsException;
+import com.jcieslak.tastypl.exception.HasNullFieldsException;
 import com.jcieslak.tastypl.exception.NotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,9 @@ public class ContactService {
     }
 
     public Contact createContact(Contact contact){
+        //checks whether provided contact has null fields, if so, throws a hasNullFields exception
+        checkContactForNullFields(contact);
+
         //both email and tel must be unique, so that's checked in called method
         if(hasNonUniqueFields(contact)) throw new HasNonUniqueFieldsException(CONTACT);
 
@@ -37,6 +41,9 @@ public class ContactService {
     public Contact updateContact(Long id, Contact newContact){
         Contact contact = getContactById(id);
 
+        //checks whether provided contact has null fields, if so, throws a hasNullFields exception
+        checkContactForNullFields(newContact);
+
         //both email and tel must be unique, so that's checked in called method
         if(hasNonUniqueFields(newContact)) throw new HasNonUniqueFieldsException(CONTACT);
 
@@ -46,6 +53,9 @@ public class ContactService {
         return contactRepository.save(contact);
     }
 
+    public void checkContactForNullFields(Contact contact){
+        if(contact.getEmail() == null || contact.getTel() == null) throw new HasNullFieldsException(CONTACT);
+    }
     public boolean hasNonUniqueFields(Contact contact){
         List<Contact> contacts = getContacts();
 
