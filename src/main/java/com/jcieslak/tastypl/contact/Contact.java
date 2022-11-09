@@ -18,9 +18,9 @@ public class Contact {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
+    @Column
     private String email;
-    @Column(nullable = false)
+    @Column
     private String tel;
 
     @Override
