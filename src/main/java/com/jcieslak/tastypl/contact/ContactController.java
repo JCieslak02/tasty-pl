@@ -25,13 +25,13 @@ public class ContactController {
         return new ResponseEntity<>(contact, HttpStatus.CREATED);
     }
 
-    @DeleteMapping(path = "{contactId}")
+    @DeleteMapping(path = "/{contactId}")
     public ResponseEntity<Void> deleteContact(@PathVariable("contactId") Long id){
         contactService.deleteContact(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping(path = "{contactId}")
+    @PutMapping(path = "/{contactId}")
     public ResponseEntity<Contact> updateContact(@PathVariable("contactId") Long id, @RequestBody Contact contact){
         contactService.updateContact(id, contact);
         return new ResponseEntity<>(contact, HttpStatus.OK);

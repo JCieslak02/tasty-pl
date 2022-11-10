@@ -30,19 +30,19 @@ public class ClientController {
         return new ResponseEntity<>(createdClient, HttpStatus.CREATED);
     }
 
-    @DeleteMapping(path = "{clientId}")
+    @DeleteMapping(path = "/{clientId}")
     public ResponseEntity<Void> deleteClient(@PathVariable("clientId") Long id){
         clientService.deleteClient(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping(path = "{clientId}")
+    @PutMapping(path = "/{clientId}")
     public ResponseEntity<Client> updateClient(@PathVariable("clientId") Long id, @RequestBody Client client){
         Client updatedClient = clientService.updateClient(id, client);
         return new ResponseEntity<>(updatedClient, HttpStatus.OK);
     }
 
-    @PutMapping(path = "{clientId}/contact")
+    @PutMapping(path = "/{clientId}/contact")
     public ResponseEntity<Contact> updateClientContact(@PathVariable("clientId") Long id, @RequestBody Contact newContact){
         Contact updatedContact = clientService.updateClientContact(id, newContact);
         return new ResponseEntity<>(updatedContact, HttpStatus.OK);
