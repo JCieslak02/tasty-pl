@@ -25,44 +25,44 @@ public class ClientService {
         return clientRepository.findAll();
     }
 
-    //there's no need to check for duplicates in this class, the only unique thing for clients is contact, and it's validated in contactService class
+    // there's no need to check for duplicates in this class, the only unique thing for clients is contact, and it's validated in contactService class
     public Client createClient(Client client){
-        //checks if there are null fields, if so, throws a hasNullFields exception
+        // checks if there are null fields, if so, throws a hasNullFields exception
         checkForNullFields(client);
-        //this method adds a contact to db after validating it for nonUnique fields and duplicates
+        // this method adds a contact to db after validating it for nonUnique fields and duplicates
         contactService.createContact(client.getContact());
 
         return clientRepository.save(client);
     }
 
     public void deleteClient(long id){
-        //called method takes care of not found exception
+        // called method takes care of not found exception
         Client client = getClientById(id);
         clientRepository.delete(client);
     }
 
     public Client updateClient(long id, Client newClient){
-        //this method gets the client entity from db, and takes care of not found exception
+        // this method gets the client entity from db, and takes care of not found exception
         Client client = getClientById(id);
 
-        //checks if there are null fields, if so, throws a hasNullFields exception
+        // checks if there are null fields, if so, throws a hasNullFields exception
         checkForNullFields(newClient);
 
-        //this method updates checks for contact uniqueness and updates it in db || throws exception if non unique
-        contactService.updateContact(client.getContact().getId(), newClient.getContact());
+        // this method checks for contact uniqueness and updates it in db || throws exception if non-unique
+        Contact newContact = contactService.updateContact(client.getContact().getId(), newClient.getContact());
 
-        client.setContact(newClient.getContact());
+        client.setContact(newContact);
         client.setFirstName(newClient.getFirstName());
         client.setLastName(newClient.getLastName());
 
         return clientRepository.save(client);
     }
 
-    public Contact updateClientContact(long id, Contact newContact){
-        //this method gets the client entity from db, and takes care of not found exception
-        Client client = getClientById(id);
+    public Contact updateClientContact(long clientId, Contact newContact){
+        // this method gets the client entity from db, and takes care of not found exception
+        Client client = getClientById(clientId);
 
-        //this method updates checks for contact uniqueness and updates it in db || throws exception if non unique
+        // this method updates checks for contact uniqueness and updates it in db || throws exception if non unique
         return contactService.updateContact(client.getContact().getId(), newContact);
     }
 

@@ -24,10 +24,10 @@ public class ContactService {
     }
 
     public Contact createContact(Contact contact){
-        //checks whether provided contact has null fields, if so, throws a hasNullFields exception
+        // checks whether provided contact has null fields, if so, throws a hasNullFields exception
         checkContactForNullFields(contact);
 
-        //both email and tel must be unique, so that's checked in called method
+        // both email and tel must be unique, so that's checked in called method
         if(hasNonUniqueFields(contact)) throw new HasNonUniqueFieldsException(CONTACT);
 
         return contactRepository.save(contact);
@@ -41,11 +41,14 @@ public class ContactService {
     public Contact updateContact(Long id, Contact newContact){
         Contact contact = getContactById(id);
 
-        //checks whether provided contact has null fields, if so, throws a hasNullFields exception
+        // checks whether provided contact has null fields, if so, throws a hasNullFields exception
         checkContactForNullFields(newContact);
 
-        //both email and tel must be unique, so that's checked in called method
-        if(hasNonUniqueFields(newContact)) throw new HasNonUniqueFieldsException(CONTACT);
+        // no need to do anything more if provided contact is the same as in db
+        if(newContact.equals(contact)) return contact;
+
+        // both email and tel must be unique, so that's checked in called method
+        if(hasNonUniqueFields(contact, newContact)) throw new HasNonUniqueFieldsException(CONTACT);
 
         contact.setEmail(newContact.getEmail());
         contact.setTel(newContact.getTel());
@@ -67,4 +70,20 @@ public class ContactService {
 
         return false;
     }
+
+    // this method is used to check if a provided contact to replace existing in db has any duplicate fields with any other db contact,
+    // excluding the one to be changed
+    public boolean hasNonUniqueFields(Contact contact, Contact newContact){
+        List<Contact> contacts = getContacts();
+
+        for(Contact dbContact : contacts){
+            if(dbContact.equals(contact)) continue;
+            if(dbContact.getTel().equals(newContact.getTel()) || dbContact.getEmail().equals(newContact.getEmail())){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }

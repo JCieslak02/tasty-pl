@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Service
 public class AddressService {
-    //this constant is a dum dum solution, I'll change it soon
+    // this constant is a dum dum solution, I'll change it soon
     public static final String ADDRESS = "address";
     private final AddressRepository addressRepository;
 
@@ -35,17 +35,20 @@ public class AddressService {
     }
 
     public void deleteAddress(Long id){
-        //called method takes care of not found exception
+        // called method takes care of not found exception
         Address address = getAddressById(id);
         addressRepository.delete(address);
     }
 
     public Address updateAddress(Long id, Address newAddress){
-        //called method takes care of not found exception
+        // called method takes care of not found exception
         Address address = getAddressById(id);
-
+        // check for possible null fields that aren't nullable
         checkAddressForNullFields(newAddress);
 
+        // no need to do anything if it's the same as in db
+        if(newAddress.equals(address)) return address;
+        // check if address is a duplicate
         if(isAddressADuplicate(newAddress)) throw new AlreadyExistsException(ADDRESS);
 
         address.setCountry(newAddress.getCountry());
@@ -59,7 +62,7 @@ public class AddressService {
         return addressRepository.save(address);
     }
 
-    //simply checks for fields that cant be null, if they are, it throws an exception
+    // simply checks for fields that cant be null, if they are, it throws an exception
     public void checkAddressForNullFields(Address address){
         if(address.getCountry() == null
                 || address.getZipCode() == null
