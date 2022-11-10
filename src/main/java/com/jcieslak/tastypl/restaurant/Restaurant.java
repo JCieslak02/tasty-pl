@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @NoArgsConstructor
@@ -33,8 +34,15 @@ public class Restaurant {
     @JoinColumn(name="address_id", referencedColumnName = "id")
     private Address address;
 
-    public Restaurant(String name, String type) {
-        this.name = name;
-        this.type = type;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Restaurant that)) return false;
+        return name.equals(that.name) && type.equals(that.type) && contact.equals(that.contact) && address.equals(that.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, type, contact, address);
     }
 }
