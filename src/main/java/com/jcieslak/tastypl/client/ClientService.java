@@ -49,9 +49,8 @@ public class ClientService {
         checkForNullFields(newClient);
 
         // this method checks for contact uniqueness and updates it in db || throws exception if non-unique
-        Contact newContact = contactService.updateContact(client.getContact().getId(), newClient.getContact());
+        contactService.updateContact(client.getContact().getId(), newClient.getContact());
 
-        client.setContact(newContact);
         client.setFirstName(newClient.getFirstName());
         client.setLastName(newClient.getLastName());
 
