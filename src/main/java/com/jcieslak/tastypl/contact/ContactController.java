@@ -21,8 +21,8 @@ public class ContactController {
 
     @PostMapping
     public ResponseEntity<Contact> addContact(@RequestBody Contact contact){
-        contactService.createContact(contact);
-        return new ResponseEntity<>(contact, HttpStatus.CREATED);
+        Contact savedContact = contactService.createContact(contact);
+        return new ResponseEntity<>(savedContact, HttpStatus.CREATED);
     }
 
     @DeleteMapping(path = "/{contactId}")
@@ -33,7 +33,7 @@ public class ContactController {
 
     @PutMapping(path = "/{contactId}")
     public ResponseEntity<Contact> updateContact(@PathVariable("contactId") Long id, @RequestBody Contact contact){
-        contactService.updateContact(id, contact);
-        return new ResponseEntity<>(contact, HttpStatus.OK);
+        Contact updatedContact = contactService.updateContact(id, contact);
+        return new ResponseEntity<>(updatedContact, HttpStatus.OK);
     }
 }

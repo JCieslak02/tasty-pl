@@ -20,8 +20,9 @@ public class ClientController {
     }
 
     @GetMapping( "/{clientId}")
-    public Client getClientById(@PathVariable(name = "clientId") Long id){
-        return clientService.getClientById(id);
+    public ResponseEntity<Client> getClientById(@PathVariable(name = "clientId") Long id){
+        Client client = clientService.getClientById(id);
+        return ResponseEntity.ok().body(client);
     }
 
     @PostMapping
