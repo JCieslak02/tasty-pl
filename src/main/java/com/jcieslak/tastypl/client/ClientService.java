@@ -21,7 +21,7 @@ public class ClientService {
                 .orElseThrow(() -> new NotFoundException(CLIENT, id));
     }
 
-    public List<Client> getClients(){
+    public List<Client> getAllClients(){
         return clientRepository.findAll();
     }
 

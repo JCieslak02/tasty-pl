@@ -15,8 +15,9 @@ public class ContactController {
     private final ContactService contactService;
 
     @GetMapping
-    public List<Contact> getContacts(){
-        return contactService.getContacts();
+    public ResponseEntity<List<Contact>> getAllContacts(){
+        List<Contact> contacts = contactService.getAllContacts();
+        return new ResponseEntity<>(contacts, HttpStatus.OK);
     }
 
     @PostMapping

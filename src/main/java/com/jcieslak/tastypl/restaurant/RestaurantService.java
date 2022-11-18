@@ -20,7 +20,7 @@ public class RestaurantService {
     private final ContactService contactService;
     private static final String RESTAURANT = "restaurant";
 
-    public List<Restaurant> getRestaurants(){
+    public List<Restaurant> getAllRestaurants(){
         return restaurantRepository.findAll();
     }
 
@@ -81,7 +81,7 @@ public class RestaurantService {
     }
 
     public boolean isRestaurantADuplicate(Restaurant restaurant){
-        List<Restaurant> restaurants = getRestaurants();
+        List<Restaurant> restaurants = getAllRestaurants();
 
         for(Restaurant dbRestaurant : restaurants){
             if(dbRestaurant.equals(restaurant)) return true;
@@ -97,5 +97,12 @@ public class RestaurantService {
             || restaurant.getContact() == null){
                 throw new HasNullFieldsException(RESTAURANT);
         }
+    }
+
+    // this method is used in mealService, its utility is basically the same as the method called in it
+    // imo there's no need to use it internally, it's created solely to improve code readability
+    public void checkIfRestaurantExistsById(Long id){
+        //called method takes care of notFound exc
+        getRestaurantById(id);
     }
 }

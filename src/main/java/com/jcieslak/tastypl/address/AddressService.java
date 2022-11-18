@@ -20,7 +20,7 @@ public class AddressService {
                 .orElseThrow(() -> new NotFoundException(ADDRESS, id));
     }
 
-    public List<Address> getAddresses(){
+    public List<Address> getAllAddresses(){
         return addressRepository.findAll();
     }
 
@@ -74,7 +74,7 @@ public class AddressService {
     }
 
     public boolean isAddressADuplicate(Address address){
-        List<Address> addresses = getAddresses();
+        List<Address> addresses = getAllAddresses();
 
         for(Address dbAddress : addresses){
             if(dbAddress.equals(address)){

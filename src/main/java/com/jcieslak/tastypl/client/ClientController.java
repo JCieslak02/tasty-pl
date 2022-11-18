@@ -15,14 +15,15 @@ public class ClientController {
     private final ClientService clientService;
 
     @GetMapping
-    public List<Client> getClients(){
-        return clientService.getClients();
+    public ResponseEntity<List<Client>> getAllClients(){
+        List<Client> clients = clientService.getAllClients();
+        return new ResponseEntity<>(clients, HttpStatus.OK);
     }
 
     @GetMapping( "/{clientId}")
     public ResponseEntity<Client> getClientById(@PathVariable(name = "clientId") Long id){
         Client client = clientService.getClientById(id);
-        return ResponseEntity.ok().body(client);
+        return new ResponseEntity<>(client, HttpStatus.CREATED);
     }
 
     @PostMapping

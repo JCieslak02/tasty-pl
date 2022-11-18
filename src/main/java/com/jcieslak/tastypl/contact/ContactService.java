@@ -19,7 +19,7 @@ public class ContactService {
                 .orElseThrow(() -> new NotFoundException(CONTACT, id));
     }
 
-    public List<Contact> getContacts(){
+    public List<Contact> getAllContacts(){
         return contactRepository.findAll();
     }
 
@@ -60,7 +60,7 @@ public class ContactService {
         if(contact.getEmail() == null || contact.getTel() == null) throw new HasNullFieldsException(CONTACT);
     }
     public boolean hasNonUniqueFields(Contact contact){
-        List<Contact> contacts = getContacts();
+        List<Contact> contacts = getAllContacts();
 
         for(Contact dbContact : contacts){
             if(dbContact.getTel().equals(contact.getTel()) || dbContact.getEmail().equals(contact.getEmail())){
@@ -74,7 +74,7 @@ public class ContactService {
     // this method is used to check if a provided contact to replace existing in db has any duplicate fields with any other db contact,
     // excluding the one to be changed
     public boolean hasNonUniqueFields(Contact contact, Contact newContact){
-        List<Contact> contacts = getContacts();
+        List<Contact> contacts = getAllContacts();
 
         for(Contact dbContact : contacts){
             if(dbContact.equals(contact)) continue;

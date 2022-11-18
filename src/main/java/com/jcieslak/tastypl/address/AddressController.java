@@ -14,14 +14,15 @@ public class AddressController {
     private final AddressService addressService;
 
     @GetMapping
-    public List<Address> getAddresses(){
-        return addressService.getAddresses();
+    public ResponseEntity<List<Address>> getAllAddresses(){
+        List<Address> addresses = addressService.getAllAddresses();
+        return new ResponseEntity<>(addresses, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Address> getAddressById(@PathVariable(name="id") Long id){
         Address address = addressService.getAddressById(id);
-        return ResponseEntity.ok().body(address);
+        return new ResponseEntity<>(address, HttpStatus.OK);
     }
 
     @PostMapping
@@ -33,8 +34,7 @@ public class AddressController {
     @PutMapping(path = "/{addressId}")
     public ResponseEntity<Address> updateAddress(@PathVariable("addressId") Long id, @RequestBody Address newAddress){
         Address address = addressService.updateAddress(id, newAddress);
-
-        return ResponseEntity.ok().body(address);
+        return new ResponseEntity<>(address, HttpStatus.OK);
     }
     @DeleteMapping(path="/{addressId}")
     public ResponseEntity<Void> deleteAddress(@PathVariable("addressId") Long id){
