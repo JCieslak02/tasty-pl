@@ -1,5 +1,6 @@
-package com.jcieslak.tastypl.contact;
+package com.jcieslak.tastypl.repository;
 
+import com.jcieslak.tastypl.model.Contact;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
