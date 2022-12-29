@@ -1,8 +1,10 @@
-package com.jcieslak.tastypl.address;
+package com.jcieslak.tastypl.service;
 
+import com.jcieslak.tastypl.model.Address;
 import com.jcieslak.tastypl.exception.AlreadyExistsException;
 import com.jcieslak.tastypl.exception.HasNullFieldsException;
 import com.jcieslak.tastypl.exception.NotFoundException;
+import com.jcieslak.tastypl.repository.AddressRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 @Service
 public class AddressService {
-    // this constant is a dum dum solution, I'll change it soon
     public static final String ADDRESS = "address";
     private final AddressRepository addressRepository;
 

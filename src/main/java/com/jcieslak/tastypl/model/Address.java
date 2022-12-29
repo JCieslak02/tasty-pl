@@ -1,4 +1,4 @@
-package com.jcieslak.tastypl.address;
+package com.jcieslak.tastypl.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
