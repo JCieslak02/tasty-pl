@@ -1,5 +1,6 @@
-package com.jcieslak.tastypl.meal;
+package com.jcieslak.tastypl.repository;
 
+import com.jcieslak.tastypl.model.Meal;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
