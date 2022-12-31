@@ -1,12 +1,11 @@
-package com.jcieslak.tastypl.restaurant;
+package com.jcieslak.tastypl.service;
 
-import com.jcieslak.tastypl.address.Address;
-import com.jcieslak.tastypl.address.AddressService;
-import com.jcieslak.tastypl.contact.Contact;
-import com.jcieslak.tastypl.contact.ContactService;
+import com.jcieslak.tastypl.model.Address;
 import com.jcieslak.tastypl.exception.AlreadyExistsException;
 import com.jcieslak.tastypl.exception.HasNullFieldsException;
 import com.jcieslak.tastypl.exception.NotFoundException;
+import com.jcieslak.tastypl.model.Restaurant;
+import com.jcieslak.tastypl.repository.RestaurantRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +16,6 @@ import java.util.List;
 public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
     private final AddressService addressService;
-    private final ContactService contactService;
     private static final String RESTAURANT = "restaurant";
 
     public List<Restaurant> getAllRestaurants(){
@@ -36,7 +34,6 @@ public class RestaurantService {
 
         // these two calls to external services also validate given values for uniqueness and null fields
         addressService.createAddress(restaurant.getAddress());
-        contactService.createContact(restaurant.getContact());
 
         return restaurantRepository.save(restaurant);
     }
@@ -57,20 +54,12 @@ public class RestaurantService {
         // checks provided new restaurant whether it is a duplicate or not
         if(isRestaurantADuplicate(newRestaurant)) throw new AlreadyExistsException(RESTAURANT);
 
-        contactService.updateContact(restaurant.getContact().getId(), newRestaurant.getContact());
         addressService.updateAddress(restaurant.getAddress().getId(), newRestaurant.getAddress());
 
         restaurant.setType(newRestaurant.getType());
         restaurant.setName(newRestaurant.getName());
 
         return restaurantRepository.save(restaurant);
-    }
-
-    public Contact updateRestaurantContact(Long restaurantId, Contact contact){
-        Restaurant restaurant = getRestaurantById(restaurantId);
-
-        // this call performs all validation necessary
-        return contactService.updateContact(restaurant.getContact().getId(), contact);
     }
 
     public Address updateRestaurantAddress(Long restaurantId, Address address){
@@ -93,16 +82,8 @@ public class RestaurantService {
     public void checkForNullFields(Restaurant restaurant){
         if(restaurant.getName() == null
             || restaurant.getType() == null
-            || restaurant.getAddress() == null
-            || restaurant.getContact() == null){
+            || restaurant.getAddress() == null){
                 throw new HasNullFieldsException(RESTAURANT);
         }
-    }
-
-    // this method is used in mealService, its utility is basically the same as the method called in it
-    // imo there's no need to use it internally, it's created solely to improve code readability
-    public void checkIfRestaurantExistsById(Long id){
-        //called method takes care of notFound exc
-        getRestaurantById(id);
     }
 }

@@ -1,7 +1,5 @@
-package com.jcieslak.tastypl.restaurant;
+package com.jcieslak.tastypl.model;
 
-import com.jcieslak.tastypl.address.Address;
-import com.jcieslak.tastypl.contact.Contact;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,11 +24,11 @@ public class Restaurant {
     @Column(name = "restaurant_type")
     private String type;
 
-    @OneToOne
-    @JoinColumn(name = "contact_id", referencedColumnName = "id")
-    private Contact contact;
+    private String email;
 
-    @OneToOne
+    @Column(name = "phone_number")
+    private String phoneNumber;
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="address_id", referencedColumnName = "id")
     private Address address;
 
@@ -38,11 +36,11 @@ public class Restaurant {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Restaurant that)) return false;
-        return name.equals(that.name) && type.equals(that.type) && contact.equals(that.contact) && address.equals(that.address);
+        return id.equals(that.id) && name.equals(that.name) && type.equals(that.type) && email.equals(that.email) && phoneNumber.equals(that.phoneNumber) && address.equals(that.address);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, type, contact, address);
+        return Objects.hash(id, name, type, email, phoneNumber, address);
     }
 }

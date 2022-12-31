@@ -1,4 +1,4 @@
-package com.jcieslak.tastypl.dto;
+package com.jcieslak.tastypl.payload.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

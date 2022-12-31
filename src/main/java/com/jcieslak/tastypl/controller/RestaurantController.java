@@ -1,9 +1,9 @@
-package com.jcieslak.tastypl.restaurant;
+package com.jcieslak.tastypl.controller;
 
-import com.jcieslak.tastypl.address.Address;
-import com.jcieslak.tastypl.contact.Contact;
-import com.jcieslak.tastypl.meal.Meal;
-import com.jcieslak.tastypl.meal.MealService;
+import com.jcieslak.tastypl.payload.dto.MealDTO;
+import com.jcieslak.tastypl.service.MealService;
+import com.jcieslak.tastypl.model.Restaurant;
+import com.jcieslak.tastypl.service.RestaurantService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/restaurants")
+@RequestMapping("/api/restaurants")
 @AllArgsConstructor
 public class RestaurantController {
     private final RestaurantService restaurantService;
@@ -30,10 +30,9 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 
-    //should I have a separate method in restaurantService to get the meals? I have no idea lol
     @GetMapping("/{id}/menu")
-    public ResponseEntity<List<Meal>> getRestaurantMenu(@PathVariable("id") Long id){
-        List<Meal> menu = mealService.getAllMealsByRestaurantId(id);
+    public ResponseEntity<List<MealDTO>> getRestaurantMenuById(@PathVariable("id") Long id){
+        List<MealDTO> menu = mealService.getAllMealsByRestaurantId(id);
         return new ResponseEntity<>(menu, HttpStatus.OK);
     }
 
@@ -50,20 +49,15 @@ public class RestaurantController {
     }
 
     @DeleteMapping(path = "/{id}")
-    public ResponseEntity<Void> deleteRestaurant(@PathVariable Long id){
+    public ResponseEntity<Void> deleteRestaurant(@PathVariable("id") Long id){
         restaurantService.deleteRestaurant(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping(path = "/{id}/contacts")
-    public ResponseEntity<Contact> updateRestaurantContact(@PathVariable Long id, @RequestBody Contact contact){
-        Contact updatedContact = restaurantService.updateRestaurantContact(id, contact);
-        return new ResponseEntity<>(updatedContact, HttpStatus.OK);
-    }
-
-    @PutMapping(path = "/{id}/addresses")
-    public ResponseEntity<Address> updateRestaurantAddress(@PathVariable Long id, @RequestBody Address address){
-        Address updatedAddress = restaurantService.updateRestaurantAddress(id, address);
-        return new ResponseEntity<>(updatedAddress, HttpStatus.OK);
+    @PostMapping(path = "/{id}/meals")
+    public ResponseEntity<MealDTO> createMeal(@PathVariable("id") Long restaurantId, @RequestBody MealDTO mealDTO){
+        mealDTO.setRestaurantId(restaurantId);
+        mealService.createMeal(mealDTO);
+        return new ResponseEntity<>(mealDTO, HttpStatus.CREATED);
     }
 }
