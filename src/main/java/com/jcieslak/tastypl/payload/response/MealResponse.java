@@ -1,4 +1,4 @@
-package com.jcieslak.tastypl.payload.dto;
+package com.jcieslak.tastypl.payload.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,12 +6,12 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
-@AllArgsConstructor
 @Getter
 @Setter
-public class MealDTO {
+@AllArgsConstructor
+public class MealResponse {
     private String name;
     private String type;
     private BigDecimal price;
-    private Long restaurantId;
+    private long restaurantId;
 }

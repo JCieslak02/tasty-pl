@@ -1,6 +1,6 @@
 package com.jcieslak.tastypl.payload.request;
 
-import com.jcieslak.tastypl.enums.UserRole;
+import com.jcieslak.tastypl.model.Address;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NonNull;
@@ -9,19 +9,15 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class SignupRequest {
+public class RestaurantRequest {
     @NonNull
-    private String username;
+    private String restaurantName;
     @NonNull
-    private String firstName;
+    private String restaurantType;
     @NonNull
-    private String lastName;
-    @NonNull
-    private String email;
+    private Address address;
     @NonNull
     private String phoneNumber;
     @NonNull
-    private String password;
-    @NonNull
-    private UserRole userRole;
+    private String email;
 }
