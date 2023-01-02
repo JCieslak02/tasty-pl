@@ -1,16 +1,21 @@
 package com.jcieslak.tastypl.security.jwt;
 
 import com.jcieslak.tastypl.model.User;
+import com.jcieslak.tastypl.security.config.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 @Component
+@RequiredArgsConstructor
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
     //the @Value doesn't work properly for some reason, I'll work in later stages of the project, so for now it's hardcoded here
@@ -19,6 +24,8 @@ public class JwtUtils {
 
     @Value("${jcieslak.app.jwtExpirationMs}")
     private long jwtExpirationMs;
+
+    private final UserDetailsServiceImpl userDetailsService;
 
     public String generateJwtToken(Authentication authentication) {
 
@@ -60,5 +67,15 @@ public class JwtUtils {
         }
 
         return false;
+    }
+
+    public String parseJwt(HttpServletRequest request) {
+        String headerAuth = request.getHeader("Authorization");
+
+        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+            return headerAuth.substring(7);
+        }
+
+        return null;
     }
 }
