@@ -32,6 +32,10 @@ public class Restaurant {
     @JoinColumn(name="address_id", referencedColumnName = "id")
     private Address address;
 
+    @ManyToOne
+    @JoinColumn(name = "owner_id", referencedColumnName = "id")
+    private User owner;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
