@@ -1,12 +1,12 @@
 package com.jcieslak.tastypl.service;
 
-import com.jcieslak.tastypl.dto.MealDTO;
+import com.jcieslak.tastypl.payload.request.MealRequest;
 import com.jcieslak.tastypl.exception.AlreadyExistsException;
 import com.jcieslak.tastypl.exception.HasNullFieldsException;
 import com.jcieslak.tastypl.exception.NotFoundException;
 import com.jcieslak.tastypl.model.Meal;
+import com.jcieslak.tastypl.payload.response.MealResponse;
 import com.jcieslak.tastypl.repository.MealRepository;
-import com.jcieslak.tastypl.service.RestaurantService;
 import com.jcieslak.tastypl.util.MealMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,25 +23,36 @@ public class MealService {
     private final MealMapper mealMapper;
     private static final String MEAL = "meal";
 
-    public List<Meal> getAllMeals(){
-        return mealRepository.findAll();
+    public List<MealResponse> getAllMeals(){
+        List<Meal> meals = mealRepository.findAll();
+
+        return meals.stream()
+                .map(mealMapper::toResponse)
+                .toList();
     }
 
-    public Meal getMealById(Long id){
+    public MealResponse getMealById(Long id){
+        return mealMapper
+                .toResponse(getMealByIdOrThrowExc(id));
+    }
+
+    public Meal getMealByIdOrThrowExc(Long id){
         return mealRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(MEAL, id));
     }
 
-    public List<MealDTO> getAllMealsByRestaurantId(Long restaurantId){
+    public List<MealResponse> getAllMealsByRestaurantId(Long restaurantId){
         //called method checks whether the provided id is valid, throws notFound exc otherwise
-        restaurantService.getRestaurantById(restaurantId);
+        restaurantService.getRestaurantByIdOrThrowExc(restaurantId);
         return mealRepository.findAllByRestaurantId(restaurantId).stream()
-                .map(mealMapper::toDTO)
+                .map(mealMapper::toResponse)
                 .toList();
     }
 
-    public MealDTO createMeal(MealDTO mealDTO){
-        Meal meal = mealMapper.toEntity(mealDTO);
+    public MealResponse createMeal(MealRequest mealRequest, Long restaurantId){
+        Meal meal = mealMapper.toEntity(mealRequest);
+        meal.setRestaurant(restaurantService.getRestaurantByIdOrThrowExc(restaurantId));
+
         //throws hasNullFields exc if there are any null fields
         checkForNullFields(meal);
 
@@ -49,28 +60,30 @@ public class MealService {
 
         mealRepository.save(meal);
 
-        return mealMapper.toDTO(meal);
+        return mealMapper.toResponse(meal);
     }
 
-    public Meal updateMeal(Long id, Meal newMeal){
-        Meal meal = getMealById(id);
-
+    public MealResponse updateMeal(Long id, MealRequest mealRequest){
+        Meal meal = getMealByIdOrThrowExc(id);
+        Meal newMeal = mealMapper.toEntity(mealRequest);
         checkForNullFields(newMeal);
-        if(newMeal.equals(meal)) return meal;
+
         if(isMealADuplicate(meal)) throw new AlreadyExistsException(MEAL);
 
         meal.setType(newMeal.getType());
         meal.setName(newMeal.getName());
         meal.setPrice(newMeal.getPrice());
-        meal.setRestaurant(newMeal.getRestaurant());
 
-        return meal;
+        mealRepository.save(meal);
+
+        return mealMapper.toResponse(meal);
     }
 
     public void deleteMeal(Long id){
-        Meal meal = getMealById(id);
+        Meal meal = getMealByIdOrThrowExc(id);
         mealRepository.delete(meal);
     }
+    //TODO: type mismatch
     public boolean isMealADuplicate(Meal meal){
         return getAllMeals().stream()
                 .anyMatch(m -> m.equals(meal));

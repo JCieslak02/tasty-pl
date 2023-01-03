@@ -44,8 +44,6 @@ public class AddressService {
     public Address updateAddress(Long id, Address newAddress){
         // called method takes care of not found exception
         Address address = getAddressById(id);
-        // check for possible null fields that aren't nullable
-        checkAddressForNullFields(newAddress);
 
         // no need to do anything if it's the same as in db
         if(newAddress.equals(address)) return address;
@@ -84,5 +82,10 @@ public class AddressService {
         }
 
         return false;
+    }
+
+    public boolean isAddressADuplicateOrHasNullFields(Address address){
+        checkAddressForNullFields(address);
+        return isAddressADuplicate(address);
     }
 }

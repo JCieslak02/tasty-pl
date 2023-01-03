@@ -8,8 +8,8 @@ import com.jcieslak.tastypl.payload.response.JwtResponse;
 import com.jcieslak.tastypl.payload.response.SignUpResponse;
 import com.jcieslak.tastypl.repository.UserRepository;
 import com.jcieslak.tastypl.security.jwt.JwtUtils;
+import com.jcieslak.tastypl.util.UserMapper;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,7 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import static com.jcieslak.tastypl.enums.UserRole.ROLE_CUSTOMER;
+import static com.jcieslak.tastypl.enums.UserRole.ROLE_ADMIN;
 
 @Service
 @AllArgsConstructor
@@ -27,7 +27,7 @@ public class UserService {
     private final PasswordEncoder encoder;
     private final JwtUtils jwtUtils;
 
-    private final ModelMapper modelMapper;
+    private final UserMapper userMapper;
     public JwtResponse signIn(LoginRequest loginRequest){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
@@ -52,16 +52,15 @@ public class UserService {
             throw new FieldExistsInDatabase("user", "phone number");
         }
 
-        modelMapper.createTypeMap(SignupRequest.class, User.class)
-                .addMappings(m -> m.skip(User::setPassword))
-                .addMappings(m -> m.skip(User::setRole));
+        if(signupRequest.getUserRole() == ROLE_ADMIN){
+            throw new IllegalArgumentException("Admin role can only be granted to existing users");
+        }
 
-        User user = modelMapper.map(signupRequest, User.class);
+        User user = userMapper.toEntity(signupRequest);
         user.setPassword(encoder.encode(signupRequest.getPassword()));
-        user.setRole(ROLE_CUSTOMER);
 
         userRepository.save(user);
 
-        return modelMapper.map(user, SignUpResponse.class);
+        return userMapper.toResponse(user);
     }
 }
