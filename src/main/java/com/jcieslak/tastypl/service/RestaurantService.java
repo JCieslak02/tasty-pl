@@ -21,10 +21,10 @@ import java.util.Objects;
 @AllArgsConstructor
 public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
-    private final AddressService addressService;
     private static final String RESTAURANT = "restaurant";
     private final ModelMapper modelMapper;
     private final UserDetailsServiceImpl userDetailsService;
+    private final AddressService addressService;
 
     public List<RestaurantResponse> getAllRestaurants(){
         List<Restaurant> restaurants = restaurantRepository.findAll();
@@ -88,9 +88,11 @@ public class RestaurantService {
             throw new AlreadyExistsException(RESTAURANT);
         }
 
+        //address gets updated in db, called method handles validation
+        addressService.updateAddress(restaurant.getAddress().getId(), newRestaurant.getAddress());
+
         restaurant.setName(newRestaurant.getName());
         restaurant.setType(newRestaurant.getType());
-        restaurant.setAddress(newRestaurant.getAddress());
         restaurant.setPhoneNumber(newRestaurant.getPhoneNumber());
         restaurant.setEmail(newRestaurant.getEmail());
 
@@ -102,7 +104,6 @@ public class RestaurantService {
         }
         return modelMapper.map(restaurant, RestaurantResponse.class);
     }
-
     public boolean isRestaurantADuplicate(Restaurant restaurant){
         List<Restaurant> restaurants = restaurantRepository.findAll();
 
