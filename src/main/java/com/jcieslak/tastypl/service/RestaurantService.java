@@ -1,15 +1,21 @@
 package com.jcieslak.tastypl.service;
 
-import com.jcieslak.tastypl.model.Address;
+import com.jcieslak.tastypl.exception.PrincipalIsNotAnOwnerException;
 import com.jcieslak.tastypl.exception.AlreadyExistsException;
-import com.jcieslak.tastypl.exception.HasNullFieldsException;
 import com.jcieslak.tastypl.exception.NotFoundException;
 import com.jcieslak.tastypl.model.Restaurant;
+import com.jcieslak.tastypl.model.User;
+import com.jcieslak.tastypl.payload.request.RestaurantRequest;
+import com.jcieslak.tastypl.payload.response.RestaurantResponse;
 import com.jcieslak.tastypl.repository.RestaurantRepository;
+import com.jcieslak.tastypl.security.config.UserDetailsServiceImpl;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-
+import java.security.Principal;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -17,73 +23,94 @@ public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
     private final AddressService addressService;
     private static final String RESTAURANT = "restaurant";
+    private final ModelMapper modelMapper;
+    private final UserDetailsServiceImpl userDetailsService;
 
-    public List<Restaurant> getAllRestaurants(){
-        return restaurantRepository.findAll();
+    public List<RestaurantResponse> getAllRestaurants(){
+        List<Restaurant> restaurants = restaurantRepository.findAll();
+        return restaurants.stream()
+                .map(r -> modelMapper.map(r, RestaurantResponse.class))
+                .toList();
     }
 
-    public Restaurant getRestaurantById(Long id){
+    public Restaurant getRestaurantByIdOrThrowExc(Long id){
         return restaurantRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(RESTAURANT, id));
     }
 
-    public Restaurant createRestaurant(Restaurant restaurant){
-        // checks whether provided restaurant has null fields, if so, throws a hasNullFields exception
-        checkForNullFields(restaurant);
-        if(isRestaurantADuplicate(restaurant)) throw new AlreadyExistsException(RESTAURANT);
-
-        // these two calls to external services also validate given values for uniqueness and null fields
-        addressService.createAddress(restaurant.getAddress());
-
-        return restaurantRepository.save(restaurant);
+    public RestaurantResponse getRestaurantByIdForController(Long id){
+        return modelMapper.map(getRestaurantByIdOrThrowExc(id), RestaurantResponse.class);
     }
 
-    public void deleteRestaurant(Long id){
+    public RestaurantResponse createRestaurant(RestaurantRequest restaurantRequest, Principal principal){
+        //setting owner to currently logged user, controller ensures that only users with ROLE_RESTAURANT_OWNER can access this method
+        User owner = userDetailsService.loadUserByUsername(principal.getName());
+        Restaurant restaurant = modelMapper.map(restaurantRequest, Restaurant.class);
+        restaurant.setOwner(owner);
+
+        //this block takes care of duplicate data that can only belong to one restaurant (db unique const.) or null fields in address
+        try{
+            restaurantRepository.save(restaurant);
+        }
+        catch(DataIntegrityViolationException e){
+            throw new DataIntegrityViolationException("Provided restaurant has non unique fields or address has null fields");
+        }
+        return modelMapper.map(restaurant, RestaurantResponse.class);
+    }
+
+    public void deleteRestaurant(Long id, Principal principal){
         // throws notFound exception if provided id is wrong
-        Restaurant restaurant = getRestaurantById(id);
+        Restaurant restaurant = getRestaurantByIdOrThrowExc(id);
+
+        //only an owner can delete a restaurant
+        //TODO: fix no message
+        if(!isPrincipalOwnerOfRestaurant(restaurant, principal)){
+            throw new PrincipalIsNotAnOwnerException("User isn't the owner of the restaurant");
+        }
+
         restaurantRepository.delete(restaurant);
+
     }
 
-    public Restaurant updateRestaurant(Long id, Restaurant newRestaurant){
+    public RestaurantResponse updateRestaurant(Long id, RestaurantRequest restaurantRequest, Principal principal){
         // throws notFound exception if provided id is wrong
-        Restaurant restaurant = getRestaurantById(id);
+        Restaurant restaurant = getRestaurantByIdOrThrowExc(id);
 
-        // checks whether provided restaurant has null fields, if so, throws a hasNullFields exception
-        checkForNullFields(newRestaurant);
+        //only an owner can update their restaurant
+        //TODO: fix no message
+        if(!isPrincipalOwnerOfRestaurant(restaurant, principal)){
+            throw new PrincipalIsNotAnOwnerException("User isn't the owner of the restaurant");
+        }
 
-        // checks provided new restaurant whether it is a duplicate or not
-        if(isRestaurantADuplicate(newRestaurant)) throw new AlreadyExistsException(RESTAURANT);
+        Restaurant newRestaurant = modelMapper.map(restaurantRequest, Restaurant.class);
 
-        addressService.updateAddress(restaurant.getAddress().getId(), newRestaurant.getAddress());
+        if(isRestaurantADuplicate(newRestaurant)){
+            throw new AlreadyExistsException(RESTAURANT);
+        }
 
-        restaurant.setType(newRestaurant.getType());
         restaurant.setName(newRestaurant.getName());
+        restaurant.setType(newRestaurant.getType());
+        restaurant.setAddress(newRestaurant.getAddress());
+        restaurant.setPhoneNumber(newRestaurant.getPhoneNumber());
+        restaurant.setEmail(newRestaurant.getEmail());
 
-        return restaurantRepository.save(restaurant);
-    }
-
-    public Address updateRestaurantAddress(Long restaurantId, Address address){
-        Restaurant restaurant = getRestaurantById(restaurantId);
-
-        // this call performs all validation necessary
-        return addressService.updateAddress(restaurant.getAddress().getId(), address);
+        try{
+            restaurantRepository.save(restaurant);
+        }
+        catch(DataIntegrityViolationException e){
+            throw new DataIntegrityViolationException("Provided restaurant has non unique fields or address has null fields");
+        }
+        return modelMapper.map(restaurant, RestaurantResponse.class);
     }
 
     public boolean isRestaurantADuplicate(Restaurant restaurant){
-        List<Restaurant> restaurants = getAllRestaurants();
+        List<Restaurant> restaurants = restaurantRepository.findAll();
 
-        for(Restaurant dbRestaurant : restaurants){
-            if(dbRestaurant.equals(restaurant)) return true;
-        }
-
-        return false;
+        return restaurants.stream()
+                .anyMatch(r -> r.equals(restaurant));
     }
 
-    public void checkForNullFields(Restaurant restaurant){
-        if(restaurant.getName() == null
-            || restaurant.getType() == null
-            || restaurant.getAddress() == null){
-                throw new HasNullFieldsException(RESTAURANT);
-        }
+    public boolean isPrincipalOwnerOfRestaurant(Restaurant restaurant, Principal principal){
+        return Objects.equals(restaurant.getOwner().getUsername(), principal.getName());
     }
 }
