@@ -40,11 +40,11 @@ public class Restaurant {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Restaurant that)) return false;
-        return id.equals(that.id) && name.equals(that.name) && type.equals(that.type) && email.equals(that.email) && phoneNumber.equals(that.phoneNumber) && address.equals(that.address);
+        return name.equals(that.name) && type.equals(that.type) && email.equals(that.email) && phoneNumber.equals(that.phoneNumber) && address.equals(that.address);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, type, email, phoneNumber, address);
+        return Objects.hash(name, type, email, phoneNumber, address);
     }
 }

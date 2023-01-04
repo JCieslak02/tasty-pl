@@ -33,7 +33,7 @@ public class Order {
     @JoinColumn(name= "user_id")
     private User user;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id")
     private Address address;
 
@@ -41,21 +41,18 @@ public class Order {
     @JoinColumn(name="restaurant_id")
     private Restaurant restaurant;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderMealQuantity> meals = new ArrayList<>();
-
-    @Transient
-    private List<Long> mealIds;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderMealQuantity> orderMealQuantityList = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Order order)) return false;
-        return dateTime.equals(order.dateTime) && orderStatus.equals(order.orderStatus) && total.equals(order.total) && mealIds.equals(order.mealIds);
+        return dateTime.equals(order.dateTime) && orderStatus.equals(order.orderStatus) && total.equals(order.total);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dateTime, orderStatus, total, mealIds);
+        return Objects.hash(dateTime, orderStatus, total);
     }
 }
