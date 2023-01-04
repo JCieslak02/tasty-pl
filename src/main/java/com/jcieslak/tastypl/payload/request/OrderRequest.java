@@ -1,7 +1,9 @@
 package com.jcieslak.tastypl.payload.request;
 
+import com.jcieslak.tastypl.model.Address;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 import java.util.List;
@@ -10,7 +12,10 @@ import java.util.List;
 @Getter
 @Setter
 public class OrderRequest {
-    private Long userId;
+    @NonNull
     private Long restaurantId;
-    private List<OrderMealQuantityRequest> orderMealQuantities;
+    @NonNull
+    private Address address;
+    @NonNull
+    private List<MealQuantityRequest> mealQuantityRequestList;
 }

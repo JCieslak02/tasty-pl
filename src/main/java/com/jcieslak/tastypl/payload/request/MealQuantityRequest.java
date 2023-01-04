@@ -7,7 +7,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class OrderMealQuantityRequest {
+public class MealQuantityRequest {
     private Long mealId;
     private int quantity;
 }
