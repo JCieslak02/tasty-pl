@@ -1,23 +1,26 @@
 package com.jcieslak.tastypl.service;
 
 import com.jcieslak.tastypl.enums.OrderStatus;
+import com.jcieslak.tastypl.exception.EnumConstantNotPresentException;
 import com.jcieslak.tastypl.exception.MealIsFromDifferentRestaurantException;
+import com.jcieslak.tastypl.exception.NotFoundException;
+import com.jcieslak.tastypl.exception.PrincipalIsNotAnOwnerException;
 import com.jcieslak.tastypl.model.*;
 import com.jcieslak.tastypl.payload.request.MealQuantityRequest;
 import com.jcieslak.tastypl.payload.request.OrderRequest;
+import com.jcieslak.tastypl.payload.request.OrderStatusUpdateRequest;
 import com.jcieslak.tastypl.payload.response.MealQuantityResponse;
 import com.jcieslak.tastypl.payload.response.OrderResponse;
 import com.jcieslak.tastypl.repository.OrderRepository;
-import com.jcieslak.tastypl.security.config.UserDetailsServiceImpl;
 import com.jcieslak.tastypl.util.MealQuantityListMapper;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -26,14 +29,18 @@ import java.util.Objects;
 @AllArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final UserDetailsServiceImpl userDetailsService;
     private final ModelMapper modelMapper;
     private final MealService mealService;
     private final AddressService addressService;
     private final MealQuantityListMapper mealQuantityListMapper;
+    private final RestaurantService restaurantService;
     private final Logger logger = LoggerFactory.getLogger(OrderService.class);
 
-    public OrderResponse createOrder(OrderRequest orderRequest, Principal principal){
+    public Order getOrderByIdOrThrowExc(Long id){
+        return orderRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("order", id));
+    }
+    public OrderResponse createOrder(OrderRequest orderRequest){
         // this block of code ensures that there won't be any address duplicates in db - if it's present in db, it'll be set as provided address
         // in order request
         Address address = addressService.getDuplicateAddressOrProvided(orderRequest.getAddress());
@@ -60,7 +67,7 @@ public class OrderService {
         BigDecimal total = calculateTotal(orderMealQuantityList);
 
         // property settings to save order in db together with address and OrderMealQuantity
-        User user = userDetailsService.loadUserByUsername(principal.getName());
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         order.setUser(user);
         order.setOrderStatus(OrderStatus.PENDING);
         order.setOrderMealQuantityList(orderMealQuantityList);
@@ -88,6 +95,29 @@ public class OrderService {
         List<Order> orderList = orderRepository.findAllByUserId(userId);
 
         return getOrderResponses(orderList);
+    }
+
+    public OrderResponse updateOrderStatus(Long orderId, OrderStatusUpdateRequest request) {
+        Order order = getOrderByIdOrThrowExc(orderId);
+        Restaurant restaurant = order.getRestaurant();
+
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!restaurantService.isPrincipalOwnerOfRestaurant(restaurant, user)) {
+            throw new PrincipalIsNotAnOwnerException("Why didnt I make this message easier?");
+        }
+
+        OrderStatus newStatus;
+        try {
+            newStatus = OrderStatus.valueOf(request.getOrderStatus().toUpperCase());
+        } catch (Exception e) {
+            throw new EnumConstantNotPresentException(request.getOrderStatus());
+        }
+
+
+        logger.info("after if statment");
+        order.setOrderStatus(newStatus);
+        logger.info("set status");
+        return modelMapper.map(order, OrderResponse.class);
     }
 
     //method used internally to create a list of OrderResponses from a list of Orders from repo

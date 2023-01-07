@@ -8,12 +8,11 @@ import com.jcieslak.tastypl.model.User;
 import com.jcieslak.tastypl.payload.request.RestaurantRequest;
 import com.jcieslak.tastypl.payload.response.RestaurantResponse;
 import com.jcieslak.tastypl.repository.RestaurantRepository;
-import com.jcieslak.tastypl.security.config.UserDetailsServiceImpl;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,7 +22,6 @@ public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
     private static final String RESTAURANT = "restaurant";
     private final ModelMapper modelMapper;
-    private final UserDetailsServiceImpl userDetailsService;
     private final AddressService addressService;
 
     public List<RestaurantResponse> getAllRestaurants(){
@@ -42,9 +40,9 @@ public class RestaurantService {
         return modelMapper.map(getRestaurantByIdOrThrowExc(id), RestaurantResponse.class);
     }
 
-    public RestaurantResponse createRestaurant(RestaurantRequest restaurantRequest, Principal principal){
+    public RestaurantResponse createRestaurant(RestaurantRequest restaurantRequest){
         //setting owner to currently logged user, controller ensures that only users with ROLE_RESTAURANT_OWNER can access this method
-        User owner = userDetailsService.loadUserByUsername(principal.getName());
+        User owner = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Restaurant restaurant = modelMapper.map(restaurantRequest, Restaurant.class);
         restaurant.setOwner(owner);
 
@@ -58,13 +56,14 @@ public class RestaurantService {
         return modelMapper.map(restaurant, RestaurantResponse.class);
     }
 
-    public void deleteRestaurant(Long id, Principal principal){
+    public void deleteRestaurant(Long id){
         // throws notFound exception if provided id is wrong
         Restaurant restaurant = getRestaurantByIdOrThrowExc(id);
 
         //only an owner can delete a restaurant
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         //TODO: fix no message
-        if(!isPrincipalOwnerOfRestaurant(restaurant, principal)){
+        if(!isPrincipalOwnerOfRestaurant(restaurant, user)){
             throw new PrincipalIsNotAnOwnerException("User isn't the owner of the restaurant");
         }
 
@@ -72,13 +71,15 @@ public class RestaurantService {
 
     }
 
-    public RestaurantResponse updateRestaurant(Long id, RestaurantRequest restaurantRequest, Principal principal){
+    public RestaurantResponse updateRestaurant(Long id, RestaurantRequest restaurantRequest){
         // throws notFound exception if provided id is wrong
         Restaurant restaurant = getRestaurantByIdOrThrowExc(id);
 
         //only an owner can update their restaurant
+
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         //TODO: fix no message
-        if(!isPrincipalOwnerOfRestaurant(restaurant, principal)){
+        if(!isPrincipalOwnerOfRestaurant(restaurant, user)){
             throw new PrincipalIsNotAnOwnerException("User isn't the owner of the restaurant");
         }
 
@@ -111,7 +112,7 @@ public class RestaurantService {
                 .anyMatch(r -> r.equals(restaurant));
     }
 
-    public boolean isPrincipalOwnerOfRestaurant(Restaurant restaurant, Principal principal){
-        return Objects.equals(restaurant.getOwner().getUsername(), principal.getName());
+    public boolean isPrincipalOwnerOfRestaurant(Restaurant restaurant, User user){
+        return Objects.equals(restaurant.getOwner(), user);
     }
 }
