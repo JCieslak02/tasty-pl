@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(value = HttpStatus.FORBIDDEN)
 public class PrincipalIsNotAnOwnerException extends RuntimeException{
-    public PrincipalIsNotAnOwnerException(String message) {
-        super(message);
+    public PrincipalIsNotAnOwnerException() {
+        super("User is forbidden from this resource");
     }
 }

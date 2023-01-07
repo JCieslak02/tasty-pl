@@ -6,6 +6,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(value = HttpStatus.BAD_REQUEST)
 public class EnumConstantNotPresentException extends RuntimeException{
     public EnumConstantNotPresentException(String constant) {
-        super(String.format("Constant %s is not a constant", constant));
+        super(String.format("%s is not a constant", constant));
     }
 }
