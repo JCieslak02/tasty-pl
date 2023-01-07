@@ -8,7 +8,7 @@ import com.jcieslak.tastypl.payload.response.JwtResponse;
 import com.jcieslak.tastypl.payload.response.SignUpResponse;
 import com.jcieslak.tastypl.repository.UserRepository;
 import com.jcieslak.tastypl.security.jwt.JwtUtils;
-import com.jcieslak.tastypl.util.UserMapper;
+import com.jcieslak.tastypl.mapper.UserMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,7 +26,6 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder encoder;
     private final JwtUtils jwtUtils;
-
     private final UserMapper userMapper;
     public JwtResponse signIn(LoginRequest loginRequest){
         Authentication authentication = authenticationManager.authenticate(

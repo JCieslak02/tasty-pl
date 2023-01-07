@@ -9,12 +9,11 @@ import com.jcieslak.tastypl.model.*;
 import com.jcieslak.tastypl.payload.request.MealQuantityRequest;
 import com.jcieslak.tastypl.payload.request.OrderRequest;
 import com.jcieslak.tastypl.payload.request.OrderStatusUpdateRequest;
-import com.jcieslak.tastypl.payload.response.MealQuantityResponse;
 import com.jcieslak.tastypl.payload.response.OrderResponse;
 import com.jcieslak.tastypl.repository.OrderRepository;
-import com.jcieslak.tastypl.util.MealQuantityListMapper;
+import com.jcieslak.tastypl.mapper.MealQuantityListMapper;
+import com.jcieslak.tastypl.mapper.OrderMapper;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,12 +28,12 @@ import java.util.Objects;
 @AllArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final ModelMapper modelMapper;
     private final MealService mealService;
     private final AddressService addressService;
     private final MealQuantityListMapper mealQuantityListMapper;
     private final RestaurantService restaurantService;
     private final Logger logger = LoggerFactory.getLogger(OrderService.class);
+    private final OrderMapper orderMapper;
 
     public Order getOrderByIdOrThrowExc(Long id){
         return orderRepository.findById(id)
@@ -45,20 +44,13 @@ public class OrderService {
         // in order request
         Address address = addressService.getDuplicateAddressOrProvided(orderRequest.getAddress());
         orderRequest.setAddress(address);
-        Order order = modelMapper.map(orderRequest, Order.class);
+        Order order = orderMapper.toEntity(orderRequest);
 
         // creating a list of OrderMealQuantity for later counting total price and saving it to db via cascade
         // by setting order it as a field in order entity
         List<MealQuantityRequest> mealQuantityRequestList = orderRequest.getMealQuantityRequestList();
 
-        List<OrderMealQuantity> orderMealQuantityList = mealQuantityRequestList.stream()
-                .map(o -> {
-                    OrderMealQuantity orderMealQuantity = modelMapper.map(o, OrderMealQuantity.class);
-                    orderMealQuantity.setMeal(mealService.getMealByIdOrThrowExc(o.getMealId()));
-                    orderMealQuantity.setOrder(order);
-                    return orderMealQuantity;
-                })
-                .toList();
+        List<OrderMealQuantity> orderMealQuantityList = mealQuantityListMapper.fromRequestToEntity(mealQuantityRequestList, order);
 
         // check whether all meals are from the same restaurant, throw exception if not
         validateMealsRestaurant(orderMealQuantityList, orderRequest);
@@ -76,11 +68,8 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        // lines below convert stuff to create OrderResponse return object
-        List<MealQuantityResponse> mealQuantityResponseList = mealQuantityListMapper.toResponse(orderMealQuantityList);
-
-        OrderResponse orderResponse = modelMapper.map(savedOrder, OrderResponse.class);
-        orderResponse.setMealQuantityResponseList(mealQuantityResponseList);
+        // return OrderResponse instead of Order entity
+        OrderResponse orderResponse = orderMapper.toResponse(savedOrder);
         logger.info("Order created successfully");
         return orderResponse;
     }
@@ -103,7 +92,7 @@ public class OrderService {
 
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (!restaurantService.isPrincipalOwnerOfRestaurant(restaurant, user)) {
-            throw new PrincipalIsNotAnOwnerException("Why didnt I make this message easier?");
+            throw new PrincipalIsNotAnOwnerException();
         }
 
         OrderStatus newStatus;
@@ -113,21 +102,14 @@ public class OrderService {
             throw new EnumConstantNotPresentException(request.getOrderStatus());
         }
 
-
-        logger.info("after if statment");
         order.setOrderStatus(newStatus);
-        logger.info("set status");
-        return modelMapper.map(order, OrderResponse.class);
+        return orderMapper.toResponse(order);
     }
 
     //method used internally to create a list of OrderResponses from a list of Orders from repo
     public List<OrderResponse> getOrderResponses(List<Order> orderList){
         return orderList.stream()
-                .map(o -> {
-                    OrderResponse orderResponse = modelMapper.map(o, OrderResponse.class);
-                    orderResponse.setMealQuantityResponseList(mealQuantityListMapper.toResponse(o.getOrderMealQuantityList()));
-                    return orderResponse;
-                })
+                .map(orderMapper::toResponse)
                 .toList();
     }
 

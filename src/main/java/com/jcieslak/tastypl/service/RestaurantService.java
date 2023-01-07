@@ -8,8 +8,8 @@ import com.jcieslak.tastypl.model.User;
 import com.jcieslak.tastypl.payload.request.RestaurantRequest;
 import com.jcieslak.tastypl.payload.response.RestaurantResponse;
 import com.jcieslak.tastypl.repository.RestaurantRepository;
+import com.jcieslak.tastypl.mapper.RestaurantMapper;
 import lombok.AllArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -21,13 +21,14 @@ import java.util.Objects;
 public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
     private static final String RESTAURANT = "restaurant";
-    private final ModelMapper modelMapper;
     private final AddressService addressService;
+
+    private final RestaurantMapper restaurantMapper;
 
     public List<RestaurantResponse> getAllRestaurants(){
         List<Restaurant> restaurants = restaurantRepository.findAll();
         return restaurants.stream()
-                .map(r -> modelMapper.map(r, RestaurantResponse.class))
+                .map(restaurantMapper::toResponse)
                 .toList();
     }
 
@@ -37,13 +38,13 @@ public class RestaurantService {
     }
 
     public RestaurantResponse getRestaurantByIdForController(Long id){
-        return modelMapper.map(getRestaurantByIdOrThrowExc(id), RestaurantResponse.class);
+        return restaurantMapper.toResponse(getRestaurantByIdOrThrowExc(id));
     }
 
     public RestaurantResponse createRestaurant(RestaurantRequest restaurantRequest){
         //setting owner to currently logged user, controller ensures that only users with ROLE_RESTAURANT_OWNER can access this method
         User owner = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Restaurant restaurant = modelMapper.map(restaurantRequest, Restaurant.class);
+        Restaurant restaurant = restaurantMapper.toEntity(restaurantRequest);
         restaurant.setOwner(owner);
 
         //this block takes care of duplicate data that can only belong to one restaurant (db unique const.) or null fields in address
@@ -53,7 +54,7 @@ public class RestaurantService {
         catch(DataIntegrityViolationException e){
             throw new DataIntegrityViolationException("Provided restaurant has non unique fields or address has null fields");
         }
-        return modelMapper.map(restaurant, RestaurantResponse.class);
+        return restaurantMapper.toResponse(restaurant);
     }
 
     public void deleteRestaurant(Long id){
@@ -64,7 +65,7 @@ public class RestaurantService {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         //TODO: fix no message
         if(!isPrincipalOwnerOfRestaurant(restaurant, user)){
-            throw new PrincipalIsNotAnOwnerException("User isn't the owner of the restaurant");
+            throw new PrincipalIsNotAnOwnerException();
         }
 
         restaurantRepository.delete(restaurant);
@@ -80,10 +81,10 @@ public class RestaurantService {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         //TODO: fix no message
         if(!isPrincipalOwnerOfRestaurant(restaurant, user)){
-            throw new PrincipalIsNotAnOwnerException("User isn't the owner of the restaurant");
+            throw new PrincipalIsNotAnOwnerException();
         }
 
-        Restaurant newRestaurant = modelMapper.map(restaurantRequest, Restaurant.class);
+        Restaurant newRestaurant = restaurantMapper.toEntity(restaurantRequest);
 
         if(isRestaurantADuplicate(newRestaurant)){
             throw new AlreadyExistsException(RESTAURANT);
@@ -103,7 +104,7 @@ public class RestaurantService {
         catch(DataIntegrityViolationException e){
             throw new DataIntegrityViolationException("Provided restaurant has non unique fields or address has null fields");
         }
-        return modelMapper.map(restaurant, RestaurantResponse.class);
+        return restaurantMapper.toResponse(restaurant);
     }
     public boolean isRestaurantADuplicate(Restaurant restaurant){
         List<Restaurant> restaurants = restaurantRepository.findAll();

@@ -84,6 +84,15 @@ public class AddressService {
         return false;
     }
 
+    // method used in OrderService to ensure no duplicate addresses will be saved in db
+    public Address getDuplicateAddressOrProvided(Address address){
+        List<Address> addressList = getAllAddresses();
+
+        return addressList.stream()
+                .filter(dbAddress -> dbAddress.equals(address))
+                .findFirst()
+                .orElse(address);
+    }
     public boolean isAddressADuplicateOrHasNullFields(Address address){
         checkAddressForNullFields(address);
         return isAddressADuplicate(address);
