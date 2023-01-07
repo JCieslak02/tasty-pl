@@ -1,4 +1,4 @@
-package com.jcieslak.tastypl.util;
+package com.jcieslak.tastypl.mapper;
 
 import com.jcieslak.tastypl.model.User;
 import com.jcieslak.tastypl.payload.request.SignupRequest;
