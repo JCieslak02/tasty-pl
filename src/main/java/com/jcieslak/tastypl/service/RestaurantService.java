@@ -25,7 +25,7 @@ public class RestaurantService {
 
     private final RestaurantMapper restaurantMapper;
 
-    public List<RestaurantResponse> getAllRestaurants(){
+    public List<RestaurantResponse> getAllRestaurantsResponse(){
         List<Restaurant> restaurants = restaurantRepository.findAll();
         return restaurants.stream()
                 .map(restaurantMapper::toResponse)
@@ -37,7 +37,7 @@ public class RestaurantService {
                 .orElseThrow(() -> new NotFoundException(RESTAURANT, id));
     }
 
-    public RestaurantResponse getRestaurantByIdForController(Long id){
+    public RestaurantResponse getRestaurantByIdResponse(Long id){
         return restaurantMapper.toResponse(getRestaurantByIdOrThrowExc(id));
     }
 
@@ -77,7 +77,6 @@ public class RestaurantService {
         Restaurant restaurant = getRestaurantByIdOrThrowExc(id);
 
         //only an owner can update their restaurant
-
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         //TODO: fix no message
         if(!isPrincipalOwnerOfRestaurant(restaurant, user)){
@@ -98,6 +97,7 @@ public class RestaurantService {
         restaurant.setPhoneNumber(newRestaurant.getPhoneNumber());
         restaurant.setEmail(newRestaurant.getEmail());
 
+        // due to unique constraints in db, it can throw an exc for some fields
         try{
             restaurantRepository.save(restaurant);
         }
@@ -106,6 +106,7 @@ public class RestaurantService {
         }
         return restaurantMapper.toResponse(restaurant);
     }
+
     public boolean isRestaurantADuplicate(Restaurant restaurant){
         List<Restaurant> restaurants = restaurantRepository.findAll();
 
