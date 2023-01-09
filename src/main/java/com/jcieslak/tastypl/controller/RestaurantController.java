@@ -32,8 +32,8 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}/menu")
-    public ResponseEntity<List<MealResponse>> getRestaurantMenuById(@PathVariable("id") Long id){
+    @GetMapping("/{id}/meals")
+    public ResponseEntity<List<MealResponse>> getRestaurantMealsById(@PathVariable("id") Long id){
         List<MealResponse> menu = mealService.getAllMealsByRestaurantId(id);
         return new ResponseEntity<>(menu, HttpStatus.OK);
     }
@@ -61,20 +61,20 @@ public class RestaurantController {
 
     @PostMapping("/{id}/meals")
     @PreAuthorize("hasRole('ROLE_RESTAURANT_OWNER')")
-    public ResponseEntity<MealResponse> createMeal(@PathVariable("id") Long restaurantId, @RequestBody MealRequest mealRequest){
+    public ResponseEntity<MealResponse> createMealInRestaurant(@PathVariable("id") Long restaurantId, @RequestBody MealRequest mealRequest){
         MealResponse mealResponse = mealService.createMeal(mealRequest, restaurantId);
         return new ResponseEntity<>(mealResponse, HttpStatus.CREATED);
     }
     @PostMapping("/{restaurantId}/meals/{mealId}")
     @PreAuthorize("hasRole('ROLE_RESTAURANT_OWNER')")
-    public ResponseEntity<Void> deleteMeal(@PathVariable("restaurantId") Long restaurantId, @PathVariable("mealId") Long mealId){
+    public ResponseEntity<Void> deleteMealInRestaurant(@PathVariable("restaurantId") Long restaurantId, @PathVariable("mealId") Long mealId){
         mealService.deleteMeal(restaurantId, mealId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PutMapping("/{restaurantId}/meals/{mealId}")
     @PreAuthorize("hasRole('ROLE_RESTAURANT_OWNER')")
-    public ResponseEntity<MealResponse> updateMeal(@PathVariable("restaurantId") Long restaurantId, @PathVariable("mealId") Long mealId,
+    public ResponseEntity<MealResponse> updateMealInRestaurant(@PathVariable("restaurantId") Long restaurantId, @PathVariable("mealId") Long mealId,
                                                    @RequestBody MealRequest mealRequest){
         MealResponse mealResponse = mealService.updateMeal(mealId, restaurantId, mealRequest);
         return new ResponseEntity<>(mealResponse, HttpStatus.CREATED);
