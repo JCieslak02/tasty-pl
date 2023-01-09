@@ -1,5 +1,9 @@
 package com.jcieslak.tastypl.service;
 
+import com.jcieslak.tastypl.exception.MealIsFromDifferentRestaurantException;
+import com.jcieslak.tastypl.exception.PrincipalIsNotAnOwnerException;
+import com.jcieslak.tastypl.model.Restaurant;
+import com.jcieslak.tastypl.model.User;
 import com.jcieslak.tastypl.payload.request.MealRequest;
 import com.jcieslak.tastypl.exception.AlreadyExistsException;
 import com.jcieslak.tastypl.exception.NotFoundException;
@@ -8,6 +12,7 @@ import com.jcieslak.tastypl.payload.response.MealResponse;
 import com.jcieslak.tastypl.repository.MealRepository;
 import com.jcieslak.tastypl.mapper.MealMapper;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,10 +27,6 @@ public class MealService {
 
     public List<Meal> getAllMeals(){
         return mealRepository.findAll();
-    }
-
-    public MealResponse getMealById(Long id){
-        return mealMapper.toResponse(getMealByIdOrThrowExc(id));
     }
 
     public Meal getMealByIdOrThrowExc(Long id){
@@ -43,20 +44,36 @@ public class MealService {
 
     public MealResponse createMeal(MealRequest mealRequest, Long restaurantId){
         Meal meal = mealMapper.toEntity(mealRequest);
-        meal.setRestaurant(restaurantService.getRestaurantByIdOrThrowExc(restaurantId));
+        Restaurant restaurant = restaurantService.getRestaurantByIdOrThrowExc(restaurantId);
+        meal.setRestaurant(restaurant);
 
         if(isMealADuplicate(meal)) throw new AlreadyExistsException(MEAL);
+
+        // only a restaurant owner can add a meal to their place
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!restaurantService.isPrincipalOwnerOfRestaurant(restaurant, user)){
+            throw new PrincipalIsNotAnOwnerException();
+        }
 
         mealRepository.save(meal);
 
         return mealMapper.toResponse(meal);
     }
 
-    public MealResponse updateMeal(Long id, MealRequest mealRequest){
-        Meal meal = getMealByIdOrThrowExc(id);
+    public MealResponse updateMeal(Long mealId, Long restaurantId, MealRequest mealRequest){
+        Meal meal = getMealByIdOrThrowExc(mealId);
         Meal newMeal = mealMapper.toEntity(mealRequest);
+        Restaurant restaurant = restaurantService.getRestaurantByIdOrThrowExc(restaurantId);
+        // this field is set to simplify the isMealADuplicate method, otherwise I'd have to implement this method twice or override it
+        // , so imo it's the best way
+        newMeal.setRestaurant(meal.getRestaurant());
 
-        if(isMealADuplicate(meal)) throw new AlreadyExistsException(MEAL);
+        // no duplicates will get through
+        if(isMealADuplicate(newMeal)) throw new AlreadyExistsException(MEAL);
+
+        // meal has to be from the restaurant, and the user has to be the owner
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        validateMealRestaurantUser(meal, restaurant, user);
 
         meal.setType(newMeal.getType());
         meal.setName(newMeal.getName());
@@ -67,13 +84,32 @@ public class MealService {
         return mealMapper.toResponse(meal);
     }
 
-    public void deleteMeal(Long id){
-        Meal meal = getMealByIdOrThrowExc(id);
+    public void deleteMeal(Long restaurantId, Long mealId){
+        Meal meal = getMealByIdOrThrowExc(mealId);
+        Restaurant restaurant = restaurantService.getRestaurantByIdOrThrowExc(restaurantId);
+
+        // meal has to be from the restaurant, and the user has to be the owner
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        validateMealRestaurantUser(meal, restaurant, user);
+
         mealRepository.delete(meal);
     }
 
     public boolean isMealADuplicate(Meal meal){
         return getAllMeals().stream()
                 .anyMatch(m -> m.equals(meal));
+    }
+
+    //this method throws exc if a meal is from another restaurant or a user is not an owner of this restaurant
+    public void validateMealRestaurantUser(Meal meal, Restaurant restaurant, User user){
+        // meal has to be from the same restaurant
+        if(!meal.getRestaurant().equals(restaurant)){
+            throw new MealIsFromDifferentRestaurantException();
+        }
+
+        // only an owner of the restaurant can deal with their meal
+        if(!restaurantService.isPrincipalOwnerOfRestaurant(restaurant, user)){
+            throw new PrincipalIsNotAnOwnerException();
+        }
     }
 }
