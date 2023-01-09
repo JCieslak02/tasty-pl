@@ -34,7 +34,7 @@ public class Meal {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Meal meal = (Meal) o;
-        return name.equals(meal.name) && (price.compareTo(meal.price) == 0) && type.equals(meal.type);
+        return name.equals(meal.name) && (price.compareTo(meal.price) == 0) && type.equals(meal.type) && restaurant.equals(meal.getRestaurant());
     }
 
     @Override
