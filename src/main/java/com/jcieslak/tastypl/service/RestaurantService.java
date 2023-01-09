@@ -62,9 +62,8 @@ public class RestaurantService {
         Restaurant restaurant = getRestaurantByIdOrThrowExc(id);
 
         //only an owner can delete a restaurant
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         //TODO: fix no message
-        if(!isPrincipalOwnerOfRestaurant(restaurant, user)){
+        if(!isPrincipalOwnerOfRestaurant(restaurant)){
             throw new PrincipalIsNotAnOwnerException();
         }
 
@@ -77,9 +76,8 @@ public class RestaurantService {
         Restaurant restaurant = getRestaurantByIdOrThrowExc(id);
 
         //only an owner can update their restaurant
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         //TODO: fix no message
-        if(!isPrincipalOwnerOfRestaurant(restaurant, user)){
+        if(!isPrincipalOwnerOfRestaurant(restaurant)){
             throw new PrincipalIsNotAnOwnerException();
         }
 
@@ -114,7 +112,8 @@ public class RestaurantService {
                 .anyMatch(r -> r.equals(restaurant));
     }
 
-    public boolean isPrincipalOwnerOfRestaurant(Restaurant restaurant, User user){
+    public boolean isPrincipalOwnerOfRestaurant(Restaurant restaurant){
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return Objects.equals(restaurant.getOwner(), user);
     }
 }

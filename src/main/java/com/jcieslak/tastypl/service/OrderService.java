@@ -1,6 +1,7 @@
 package com.jcieslak.tastypl.service;
 
 import com.jcieslak.tastypl.enums.OrderStatus;
+import com.jcieslak.tastypl.enums.UserRole;
 import com.jcieslak.tastypl.exception.EnumConstantNotPresentException;
 import com.jcieslak.tastypl.exception.MealIsFromDifferentRestaurantException;
 import com.jcieslak.tastypl.exception.NotFoundException;
@@ -28,7 +29,6 @@ import java.util.Objects;
 @AllArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final MealService mealService;
     private final AddressService addressService;
     private final MealQuantityListMapper mealQuantityListMapper;
     private final RestaurantService restaurantService;
@@ -75,8 +75,16 @@ public class OrderService {
     }
 
     public List<OrderResponse> getAllOrdersByRestaurantId(Long restaurantId){
-        List<Order> orderList = orderRepository.findAllByRestaurantId(restaurantId);
+        // the condition below works this way: ROLE_ADMIN gets through anyway, ROLE_RESTAURANT_OWNER gets through only if they're the owner of the restaurant
+        // variables are for clarity
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Restaurant restaurant = restaurantService.getRestaurantByIdOrThrowExc(restaurantId);
 
+        if(!user.getRole().equals(UserRole.ROLE_ADMIN) &&
+                !restaurantService.isPrincipalOwnerOfRestaurant(restaurant)){
+            throw new PrincipalIsNotAnOwnerException();
+        }
+        List<Order> orderList = orderRepository.findAllByRestaurantId(restaurantId);
         return getOrderResponses(orderList);
     }
 
@@ -90,8 +98,7 @@ public class OrderService {
         Order order = getOrderByIdOrThrowExc(orderId);
         Restaurant restaurant = order.getRestaurant();
 
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!restaurantService.isPrincipalOwnerOfRestaurant(restaurant, user)) {
+        if (!restaurantService.isPrincipalOwnerOfRestaurant(restaurant)) {
             throw new PrincipalIsNotAnOwnerException();
         }
 

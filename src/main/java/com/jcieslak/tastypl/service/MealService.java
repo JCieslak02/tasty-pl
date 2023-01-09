@@ -3,7 +3,6 @@ package com.jcieslak.tastypl.service;
 import com.jcieslak.tastypl.exception.MealIsFromDifferentRestaurantException;
 import com.jcieslak.tastypl.exception.PrincipalIsNotAnOwnerException;
 import com.jcieslak.tastypl.model.Restaurant;
-import com.jcieslak.tastypl.model.User;
 import com.jcieslak.tastypl.payload.request.MealRequest;
 import com.jcieslak.tastypl.exception.AlreadyExistsException;
 import com.jcieslak.tastypl.exception.NotFoundException;
@@ -12,7 +11,6 @@ import com.jcieslak.tastypl.payload.response.MealResponse;
 import com.jcieslak.tastypl.repository.MealRepository;
 import com.jcieslak.tastypl.mapper.MealMapper;
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,8 +48,7 @@ public class MealService {
         if(isMealADuplicate(meal)) throw new AlreadyExistsException(MEAL);
 
         // only a restaurant owner can add a meal to their place
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if(!restaurantService.isPrincipalOwnerOfRestaurant(restaurant, user)){
+        if(!restaurantService.isPrincipalOwnerOfRestaurant(restaurant)){
             throw new PrincipalIsNotAnOwnerException();
         }
 
@@ -72,8 +69,7 @@ public class MealService {
         if(isMealADuplicate(newMeal)) throw new AlreadyExistsException(MEAL);
 
         // meal has to be from the restaurant, and the user has to be the owner
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        validateMealRestaurantUser(meal, restaurant, user);
+        validateMealRestaurantUser(meal, restaurant);
 
         meal.setType(newMeal.getType());
         meal.setName(newMeal.getName());
@@ -89,8 +85,7 @@ public class MealService {
         Restaurant restaurant = restaurantService.getRestaurantByIdOrThrowExc(restaurantId);
 
         // meal has to be from the restaurant, and the user has to be the owner
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        validateMealRestaurantUser(meal, restaurant, user);
+        validateMealRestaurantUser(meal, restaurant);
 
         mealRepository.delete(meal);
     }
@@ -101,14 +96,14 @@ public class MealService {
     }
 
     //this method throws exc if a meal is from another restaurant or a user is not an owner of this restaurant
-    public void validateMealRestaurantUser(Meal meal, Restaurant restaurant, User user){
+    public void validateMealRestaurantUser(Meal meal, Restaurant restaurant){
         // meal has to be from the same restaurant
         if(!meal.getRestaurant().equals(restaurant)){
             throw new MealIsFromDifferentRestaurantException();
         }
 
         // only an owner of the restaurant can deal with their meal
-        if(!restaurantService.isPrincipalOwnerOfRestaurant(restaurant, user)){
+        if(!restaurantService.isPrincipalOwnerOfRestaurant(restaurant)){
             throw new PrincipalIsNotAnOwnerException();
         }
     }
