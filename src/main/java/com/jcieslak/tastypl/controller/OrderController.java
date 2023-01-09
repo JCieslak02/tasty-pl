@@ -27,6 +27,7 @@ public class OrderController {
     }
 
     @GetMapping("/{restaurantId}")
+    @PreAuthorize("hasRole('ROLE_RESTAURANT_OWNER') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<List<OrderResponse>> getAllOrdersByRestaurantId(@PathVariable Long restaurantId){
         List<OrderResponse> orderResponseList = orderService.getAllOrdersByRestaurantId(restaurantId);
         return new ResponseEntity<>(orderResponseList, HttpStatus.OK);
