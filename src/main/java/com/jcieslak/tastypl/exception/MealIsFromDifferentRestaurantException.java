@@ -6,6 +6,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class MealIsFromDifferentRestaurantException extends RuntimeException{
     public MealIsFromDifferentRestaurantException() {
-        super("Provided meal with id %s is from another restaurant");
+        super("Provided meal is from another restaurant");
     }
 }
