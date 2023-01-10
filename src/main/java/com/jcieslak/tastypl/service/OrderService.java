@@ -91,6 +91,12 @@ public class OrderService {
     public List<OrderResponse> getAllOrdersByUserId(Long userId){
         List<Order> orderList = orderRepository.findAllByUserId(userId);
 
+        // user can only access their orders, admins get through
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(user.getRole().equals(UserRole.ROLE_CUSTOMER) && !Objects.equals(user.getId(), userId)){
+            throw new PrincipalIsNotAnOwnerException();
+        }
+
         return getOrderResponses(orderList);
     }
 
@@ -98,6 +104,7 @@ public class OrderService {
         Order order = getOrderByIdOrThrowExc(orderId);
         Restaurant restaurant = order.getRestaurant();
 
+        // only restaurant owner can change their order status
         if (!restaurantService.isPrincipalOwnerOfRestaurant(restaurant)) {
             throw new PrincipalIsNotAnOwnerException();
         }
