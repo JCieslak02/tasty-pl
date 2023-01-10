@@ -53,7 +53,7 @@ public class RestaurantController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_RESTAURANT_OWNER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_RESTAURANT_OWNER')")
     public ResponseEntity<Void> deleteRestaurant(@PathVariable("id") Long id){
         restaurantService.deleteRestaurant(id);
         return new ResponseEntity<>(HttpStatus.OK);
