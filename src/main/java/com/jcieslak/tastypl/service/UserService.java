@@ -1,6 +1,7 @@
 package com.jcieslak.tastypl.service;
 
 import com.jcieslak.tastypl.exception.FieldExistsInDatabase;
+import com.jcieslak.tastypl.exception.InvalidPhoneNumberOrEmailException;
 import com.jcieslak.tastypl.model.User;
 import com.jcieslak.tastypl.payload.request.LoginRequest;
 import com.jcieslak.tastypl.payload.request.SignupRequest;
@@ -39,6 +40,9 @@ public class UserService {
         return new JwtResponse(jwt, "Bearer", user.getId(), user.getUsername(), user.getRole());
     }
     public SignUpResponse createUser(SignupRequest signupRequest){
+        if(!isEmailAndPhoneNumberValid(signupRequest.getEmail(), signupRequest.getPhoneNumber())){
+            throw new InvalidPhoneNumberOrEmailException();
+        }
         if(userRepository.existsByEmail(signupRequest.getEmail())){
             throw new FieldExistsInDatabase("user", "email");
         }
@@ -61,5 +65,12 @@ public class UserService {
         userRepository.save(user);
 
         return userMapper.toResponse(user);
+    }
+
+    // regex validation of phoneNumber - formats XXX-XXX-XXX or XXX XXX XXX or XXXXXXXXX
+    // and email of format username@domain.tld
+    public boolean isEmailAndPhoneNumberValid(String email, String phoneNumber){
+        return phoneNumber.matches("^(\\d{3}[- ]\\d{3}[- ]\\d{3}|\\d{9})$") &&
+                email.matches("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$");
     }
 }
