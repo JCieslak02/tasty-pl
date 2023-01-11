@@ -3,21 +3,22 @@ package com.jcieslak.tastypl.payload.request;
 import com.jcieslak.tastypl.model.Address;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
+
+import javax.validation.constraints.NotNull;
 
 @AllArgsConstructor
 @Getter
 @Setter
 public class RestaurantRequest {
-    @NonNull
+    @NotNull
     private String restaurantName;
-    @NonNull
+    @NotNull
     private String restaurantType;
-    @NonNull
+    @NotNull
     private Address address;
-    @NonNull
+    @NotNull
     private String phoneNumber;
-    @NonNull
+    @NotNull
     private String email;
 }

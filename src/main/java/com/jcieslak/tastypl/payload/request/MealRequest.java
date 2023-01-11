@@ -2,19 +2,19 @@ package com.jcieslak.tastypl.payload.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 @AllArgsConstructor
 @Getter
 @Setter
 public class MealRequest {
-    @NonNull
+    @NotNull
     private String name;
-    @NonNull
+    @NotNull
     private String type;
-    @NonNull
+    @NotNull
     private BigDecimal price;
 }
