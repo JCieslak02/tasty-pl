@@ -1,4 +1,4 @@
-package com.jcieslak.tastypl.service;
+package com.jcieslak.tastypl.security.auth;
 
 import com.jcieslak.tastypl.exception.FieldExistsInDatabase;
 import com.jcieslak.tastypl.exception.InvalidPhoneNumberOrEmailException;
@@ -22,7 +22,7 @@ import static com.jcieslak.tastypl.enums.UserRole.ROLE_ADMIN;
 
 @Service
 @AllArgsConstructor
-public class UserService {
+public class AuthService {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder encoder;
@@ -65,6 +65,11 @@ public class UserService {
         userRepository.save(user);
 
         return userMapper.toResponse(user);
+    }
+
+    // utility method used across services to get current user
+    public User getPrincipal(){
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
     // regex validation of phoneNumber - formats XXX-XXX-XXX or XXX XXX XXX or XXXXXXXXX

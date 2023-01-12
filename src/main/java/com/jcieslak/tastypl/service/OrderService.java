@@ -14,6 +14,7 @@ import com.jcieslak.tastypl.payload.response.OrderResponse;
 import com.jcieslak.tastypl.repository.OrderRepository;
 import com.jcieslak.tastypl.mapper.MealQuantityListMapper;
 import com.jcieslak.tastypl.mapper.OrderMapper;
+import com.jcieslak.tastypl.security.auth.AuthService;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ public class OrderService {
     private final RestaurantService restaurantService;
     private final Logger logger = LoggerFactory.getLogger(OrderService.class);
     private final OrderMapper orderMapper;
+    private final AuthService authService;
 
     public Order getOrderByIdOrThrowExc(Long id){
         return orderRepository.findById(id)
@@ -77,7 +79,7 @@ public class OrderService {
     public List<OrderResponse> getAllOrdersByRestaurantId(Long restaurantId){
         // the condition below works this way: ROLE_ADMIN gets through anyway, ROLE_RESTAURANT_OWNER gets through only if they're the owner of the restaurant
         // variables are for clarity
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = authService.getPrincipal();
         Restaurant restaurant = restaurantService.getRestaurantByIdOrThrowExc(restaurantId);
 
         if(!user.getRole().equals(UserRole.ROLE_ADMIN) &&
@@ -92,7 +94,7 @@ public class OrderService {
         List<Order> orderList = orderRepository.findAllByUserId(userId);
 
         // user can only access their orders, admins get through
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = authService.getPrincipal();
         if(user.getRole().equals(UserRole.ROLE_CUSTOMER) && !Objects.equals(user.getId(), userId)){
             throw new PrincipalIsNotAnOwnerException();
         }
