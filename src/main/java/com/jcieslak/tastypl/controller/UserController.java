@@ -25,4 +25,8 @@ public class UserController {
         List<OrderResponse> orderResponseList = orderService.getAllOrdersByUserId(id);
         return new ResponseEntity<>(orderResponseList, HttpStatus.OK);
     }
+
+    //@GetMapping("{id}")
+    //@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
+    //public ResponseEntity<>
 }
