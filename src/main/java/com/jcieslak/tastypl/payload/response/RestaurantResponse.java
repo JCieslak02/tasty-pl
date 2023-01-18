@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 @AllArgsConstructor
 @Getter
 @Setter
@@ -18,4 +19,6 @@ public class RestaurantResponse {
     private String phoneNumber;
     private String email;
     private long ownerId;
+    private double reviewScore;
+    private int reviewCount;
 }

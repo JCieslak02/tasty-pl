@@ -13,6 +13,7 @@ import com.jcieslak.tastypl.security.auth.AuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -46,6 +47,8 @@ public class RestaurantService {
         User owner = authService.getPrincipal();
         Restaurant restaurant = restaurantMapper.toEntity(restaurantRequest);
         restaurant.setOwner(owner);
+        restaurant.setReviewScore(0);
+        restaurant.setReviewCount(0);
 
         //this block takes care of duplicate data that can only belong to one restaurant (db unique const.) or null fields in address
         try{
@@ -103,6 +106,23 @@ public class RestaurantService {
             throw new DataIntegrityViolationException("Provided restaurant has non unique fields or address has null fields");
         }
         return restaurantMapper.toResponse(restaurant);
+    }
+
+    // operationNum:
+    // 1: add review
+    // 2: delete review
+    public void updateReviewScoreAndReviewCount(Long restaurantId, int stars, int operationNum){
+        Restaurant restaurant = getRestaurantByIdOrThrowExc(restaurantId);
+        int reviewCount = restaurant.getReviewCount();
+        double allReviewsAveraged = restaurant.getReviewScore()*reviewCount;
+
+        if(operationNum == 1) reviewCount++;
+        else if(operationNum == 2) reviewCount--;
+
+        double newScore = (allReviewsAveraged + stars) / reviewCount;
+
+        restaurant.setReviewScore(newScore);
+        restaurant.setReviewCount(reviewCount);
     }
 
     public boolean isRestaurantADuplicate(Restaurant restaurant){

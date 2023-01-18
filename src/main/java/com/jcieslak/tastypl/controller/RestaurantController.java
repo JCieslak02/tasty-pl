@@ -4,8 +4,10 @@ import com.jcieslak.tastypl.payload.request.MealRequest;
 import com.jcieslak.tastypl.payload.request.RestaurantRequest;
 import com.jcieslak.tastypl.payload.response.MealResponse;
 import com.jcieslak.tastypl.payload.response.RestaurantResponse;
+import com.jcieslak.tastypl.payload.response.ReviewResponse;
 import com.jcieslak.tastypl.service.MealService;
 import com.jcieslak.tastypl.service.RestaurantService;
+import com.jcieslak.tastypl.service.ReviewService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,7 @@ import java.util.List;
 public class RestaurantController {
     private final RestaurantService restaurantService;
     private final MealService mealService;
+    private final ReviewService reviewService;
 
     @GetMapping
     public ResponseEntity<List<RestaurantResponse>> getAllRestaurants(){
@@ -80,5 +83,11 @@ public class RestaurantController {
                                                                @Valid @RequestBody MealRequest mealRequest){
         MealResponse mealResponse = mealService.updateMeal(mealId, restaurantId, mealRequest);
         return new ResponseEntity<>(mealResponse, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{restaurantId}/reviews")
+    public ResponseEntity<List<ReviewResponse>> getAllReviewsByRestaurantId(@PathVariable Long restaurantId){
+        List<ReviewResponse> reviewResponseList = reviewService.getAllReviewsByRestaurantId(restaurantId);
+        return new ResponseEntity<>(reviewResponseList, HttpStatus.OK);
     }
 }

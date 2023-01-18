@@ -26,6 +26,11 @@ public class Restaurant {
 
     private String email;
 
+    @Column(name="review_score")
+    private double reviewScore;
+
+    @Column(name="review_count")
+    private int reviewCount;
     @Column(name = "phone_number")
     private String phoneNumber;
     @OneToOne(cascade = CascadeType.ALL)
