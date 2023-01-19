@@ -1,7 +1,6 @@
 package com.jcieslak.tastypl.security.jwt;
 
 import com.jcieslak.tastypl.model.User;
-import com.jcieslak.tastypl.security.config.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -24,8 +23,6 @@ public class JwtUtils {
 
     @Value("${jcieslak.app.jwtExpirationMs}")
     private long jwtExpirationMs;
-
-    private final UserDetailsServiceImpl userDetailsService;
 
     public String generateJwtToken(Authentication authentication) {
 
