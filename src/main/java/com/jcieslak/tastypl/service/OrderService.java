@@ -167,5 +167,7 @@ public class OrderService {
         }
 
         order.setOrderStatus(OrderStatus.CANCELLED);
+
+        orderRepository.save(order);
     }
 }

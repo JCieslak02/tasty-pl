@@ -47,7 +47,7 @@ public class OrderController {
         return new ResponseEntity<>(orderResponseList, HttpStatus.OK);
     }
 
-    @PutMapping("/{orderId}")
+    @PatchMapping("/{orderId}")
     @PreAuthorize("hasRole('ROLE_CUSTOMER')")
     public ResponseEntity<Void> cancelOrder(@PathVariable Long orderId){
         orderService.cancelOrder(orderId);
