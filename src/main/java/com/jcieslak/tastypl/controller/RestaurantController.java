@@ -31,15 +31,15 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurants, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<RestaurantResponse> getRestaurantById(@PathVariable("id") Long id){
-        RestaurantResponse restaurant = restaurantService.getRestaurantByIdResponse(id);
+    @GetMapping("/{restaurantId}")
+    public ResponseEntity<RestaurantResponse> getRestaurantById(@PathVariable Long restaurantId){
+        RestaurantResponse restaurant = restaurantService.getRestaurantByIdResponse(restaurantId);
         return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}/meals")
-    public ResponseEntity<List<MealResponse>> getRestaurantMealsById(@PathVariable("id") Long id){
-        List<MealResponse> menu = mealService.getAllMealsByRestaurantId(id);
+    @GetMapping("/{restaurantId}/meals")
+    public ResponseEntity<List<MealResponse>> getRestaurantMealsById(@PathVariable Long restaurantId){
+        List<MealResponse> menu = mealService.getAllMealsByRestaurantId(restaurantId);
         return new ResponseEntity<>(menu, HttpStatus.OK);
     }
 
@@ -50,23 +50,23 @@ public class RestaurantController {
         return new ResponseEntity<>(createdRestaurant, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{restaurantId}")
     @PreAuthorize("hasRole('ROLE_RESTAURANT_OWNER')")
-    public ResponseEntity<RestaurantResponse> updateRestaurant(@PathVariable("id") Long id, @Valid @RequestBody RestaurantRequest restaurantRequest){
-        RestaurantResponse updatedRestaurant = restaurantService.updateRestaurant(id, restaurantRequest);
+    public ResponseEntity<RestaurantResponse> updateRestaurant(@PathVariable Long restaurantId, @Valid @RequestBody RestaurantRequest restaurantRequest){
+        RestaurantResponse updatedRestaurant = restaurantService.updateRestaurant(restaurantId, restaurantRequest);
         return new ResponseEntity<>(updatedRestaurant, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{restaurantId}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_RESTAURANT_OWNER')")
-    public ResponseEntity<Void> deleteRestaurant(@PathVariable("id") Long id){
-        restaurantService.deleteRestaurant(id);
+    public ResponseEntity<Void> deleteRestaurant(@PathVariable Long restaurantId){
+        restaurantService.deleteRestaurant(restaurantId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/{id}/meals")
+    @PostMapping("/{restaurantId}/meals")
     @PreAuthorize("hasRole('ROLE_RESTAURANT_OWNER')")
-    public ResponseEntity<MealResponse> createMealInRestaurant(@PathVariable("id") Long restaurantId, @Valid @RequestBody MealRequest mealRequest){
+    public ResponseEntity<MealResponse> createMealInRestaurant(@PathVariable Long restaurantId, @Valid @RequestBody MealRequest mealRequest){
         MealResponse mealResponse = mealService.createMeal(mealRequest, restaurantId);
         return new ResponseEntity<>(mealResponse, HttpStatus.CREATED);
     }

@@ -24,17 +24,17 @@ public class ReviewController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{reviewId}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
-    public ResponseEntity<Void> deleteReview(@PathVariable Long id){
-        reviewService.deleteReview(id);
+    public ResponseEntity<Void> deleteReview(@PathVariable Long reviewId){
+        reviewService.deleteReview(reviewId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{reviewId}")
     @PreAuthorize("hasRole('ROLE_CUSTOMER')")
-    public ResponseEntity<ReviewResponse> updateReview(@Valid @RequestBody ReviewRequest reviewRequest, @PathVariable Long id){
-        ReviewResponse response = reviewService.updateReview(id, reviewRequest);
+    public ResponseEntity<ReviewResponse> updateReview(@Valid @RequestBody ReviewRequest reviewRequest, @PathVariable Long reviewId){
+        ReviewResponse response = reviewService.updateReview(reviewId, reviewRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

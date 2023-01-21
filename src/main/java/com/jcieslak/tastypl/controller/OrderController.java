@@ -42,7 +42,7 @@ public class OrderController {
 
     @GetMapping("{userId}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
-    public ResponseEntity<List<OrderResponse>> getAllOrdersByUserId(@PathVariable("userId") Long userId){
+    public ResponseEntity<List<OrderResponse>> getAllOrdersByUserId(@PathVariable Long userId){
         List<OrderResponse> orderResponseList = orderService.getAllOrdersByUserId(userId);
         return new ResponseEntity<>(orderResponseList, HttpStatus.OK);
     }
