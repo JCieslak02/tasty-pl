@@ -104,6 +104,12 @@ public class OrderService {
 
     public OrderResponse updateOrderStatus(Long orderId, OrderStatusUpdateRequest request) {
         Order order = getOrderByIdOrThrowExc(orderId);
+
+        // cancelled orders can't be uncancelled
+        if(order.getOrderStatus().equals(OrderStatus.CANCELLED)){
+            throw new IllegalArgumentException("Order is already cancelled");
+        }
+
         Restaurant restaurant = order.getRestaurant();
 
         // only restaurant owner can change their order status
@@ -122,15 +128,15 @@ public class OrderService {
         return orderMapper.toResponse(order);
     }
 
-    //method used internally to create a list of OrderResponses from a list of Orders from repo
-    public List<OrderResponse> getOrderResponses(List<Order> orderList){
+    // method used internally to create a list of OrderResponses from a list of Orders from repo
+    private List<OrderResponse> getOrderResponses(List<Order> orderList){
         return orderList.stream()
                 .map(orderMapper::toResponse)
                 .toList();
     }
 
-    //method checks if all meals are from the same restaurant, throws exception if not
-    public void validateMealsRestaurant(List<OrderMealQuantity> orderMealQuantityList, OrderRequest orderRequest){
+    // method checks if all meals are from the same restaurant, throws exception if not
+    private void validateMealsRestaurant(List<OrderMealQuantity> orderMealQuantityList, OrderRequest orderRequest){
         boolean isAnyMealFromDifferentRestaurant = orderMealQuantityList.stream()
                 .anyMatch(m -> !Objects.equals(m.getMeal().getRestaurant().getId(), orderRequest.getRestaurantId()));
 
@@ -139,7 +145,7 @@ public class OrderService {
         }
     }
 
-    //method calculates total price for an order
+    // method calculates total price for an order
     public BigDecimal calculateTotal(List<OrderMealQuantity> orderMealQuantityList){
         return orderMealQuantityList.stream()
                 .map(o -> {
@@ -149,5 +155,17 @@ public class OrderService {
                     return price.multiply(BigDecimal.valueOf(quantity));
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    // this method is used for users to cancel their order
+    public void cancelOrder(Long orderId) {
+        Order order = getOrderByIdOrThrowExc(orderId);
+        User user = authService.getPrincipal();
+
+        if(!order.getUser().equals(user)){
+            throw new PrincipalIsNotAnOwnerException();
+        }
+
+        order.setOrderStatus(OrderStatus.CANCELLED);
     }
 }

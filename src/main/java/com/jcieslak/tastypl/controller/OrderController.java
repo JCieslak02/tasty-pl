@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/api/orders")
 @AllArgsConstructor
@@ -39,5 +38,19 @@ public class OrderController {
     public ResponseEntity<OrderResponse> updateOrderStatus(@PathVariable Long orderId, @Valid @RequestBody OrderStatusUpdateRequest request){
         OrderResponse orderResponse = orderService.updateOrderStatus(orderId, request);
         return new ResponseEntity<>(orderResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("{userId}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CUSTOMER')")
+    public ResponseEntity<List<OrderResponse>> getAllOrdersByUserId(@PathVariable("userId") Long userId){
+        List<OrderResponse> orderResponseList = orderService.getAllOrdersByUserId(userId);
+        return new ResponseEntity<>(orderResponseList, HttpStatus.OK);
+    }
+
+    @PutMapping("/{orderId}")
+    @PreAuthorize("hasRole('ROLE_CUSTOMER')")
+    public ResponseEntity<Void> cancelOrder(@PathVariable Long orderId){
+        orderService.cancelOrder(orderId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
