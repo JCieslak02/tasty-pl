@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/reviews")
@@ -36,5 +37,11 @@ public class ReviewController {
     public ResponseEntity<ReviewResponse> updateReview(@Valid @RequestBody ReviewRequest reviewRequest, @PathVariable Long reviewId){
         ReviewResponse response = reviewService.updateReview(reviewId, reviewRequest);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/{restaurantId}")
+    public ResponseEntity<List<ReviewResponse>> getAllReviewsByRestaurantId(@PathVariable Long restaurantId){
+        List<ReviewResponse> reviewResponseList = reviewService.getAllReviewsByRestaurantId(restaurantId);
+        return new ResponseEntity<>(reviewResponseList, HttpStatus.OK);
     }
 }
