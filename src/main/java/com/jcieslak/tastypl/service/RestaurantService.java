@@ -12,11 +12,16 @@ import com.jcieslak.tastypl.mapper.RestaurantMapper;
 import com.jcieslak.tastypl.security.auth.AuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+
+import static org.springframework.data.domain.Sort.*;
 
 @Service
 @AllArgsConstructor
@@ -27,9 +32,16 @@ public class RestaurantService {
     private final RestaurantMapper restaurantMapper;
     private final AuthService authService;
 
-    public List<RestaurantResponse> getRestaurants(String city, String type, String sort, String direction){
-        Sort order = Sort.by(sort, Direction.);
-        List<Restaurant> restaurants = restaurantRepository.findByAddressCity(city);
+    public List<RestaurantResponse> getRestaurants(String city, String type, int page, int size, String sort, String direction){
+        Sort order = Sort.by(Direction.fromString(direction), sort);
+        Pageable pageable = PageRequest.of(page, size, order);
+        Page<Restaurant> restaurants;
+        if(type.isEmpty()){
+            restaurants = restaurantRepository.findByAddressCity(city, pageable);
+        }
+        else{
+            restaurants = restaurantRepository.findByAddressCityAndType(city, type, pageable);
+        }
         return restaurants.stream()
                 .map(restaurantMapper::toResponse)
                 .toList();

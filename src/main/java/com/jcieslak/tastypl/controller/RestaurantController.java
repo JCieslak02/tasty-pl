@@ -4,10 +4,8 @@ import com.jcieslak.tastypl.payload.request.MealRequest;
 import com.jcieslak.tastypl.payload.request.RestaurantRequest;
 import com.jcieslak.tastypl.payload.response.MealResponse;
 import com.jcieslak.tastypl.payload.response.RestaurantResponse;
-import com.jcieslak.tastypl.payload.response.ReviewResponse;
 import com.jcieslak.tastypl.service.MealService;
 import com.jcieslak.tastypl.service.RestaurantService;
-import com.jcieslak.tastypl.service.ReviewService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +21,22 @@ import java.util.List;
 public class RestaurantController {
     private final RestaurantService restaurantService;
     private final MealService mealService;
-    private final ReviewService reviewService;
 
+    // bunch of params for sorting and pagination
     @GetMapping
-    public ResponseEntity<List<RestaurantResponse>> getAllRestaurants(){
-        List<RestaurantResponse> restaurants = restaurantService.getAllRestaurantsResponse();
+    public ResponseEntity<List<RestaurantResponse>> getRestaurants(@RequestParam(name = "city", defaultValue = "warsaw")
+                                                                       String city,
+                                                                   @RequestParam(name = "type", defaultValue = "", required = false)
+                                                                       String type,
+                                                                   @RequestParam(name = "page", required = false, defaultValue = "0")
+                                                                       int page,
+                                                                   @RequestParam(name = "size", required = false, defaultValue = "15")
+                                                                       int size,
+                                                                   @RequestParam(name = "sort", defaultValue = "rating", required = false)
+                                                                       String sort,
+                                                                   @RequestParam(name = "direction", defaultValue = "asc", required = false)
+                                                                       String direction){
+        List<RestaurantResponse> restaurants = restaurantService.getRestaurants(city, type, page, size, sort, direction);
         return new ResponseEntity<>(restaurants, HttpStatus.OK);
     }
 
@@ -38,7 +47,7 @@ public class RestaurantController {
     }
 
     @GetMapping("/{restaurantId}/meals")
-    public ResponseEntity<List<MealResponse>> getRestaurantMealsById(@PathVariable Long restaurantId){
+    public ResponseEntity<List<MealResponse>> getRestaurantMealsByRestaurantId(@PathVariable Long restaurantId){
         List<MealResponse> menu = mealService.getAllMealsByRestaurantId(restaurantId);
         return new ResponseEntity<>(menu, HttpStatus.OK);
     }
@@ -83,11 +92,5 @@ public class RestaurantController {
                                                                @Valid @RequestBody MealRequest mealRequest){
         MealResponse mealResponse = mealService.updateMeal(mealId, restaurantId, mealRequest);
         return new ResponseEntity<>(mealResponse, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/{restaurantId}/reviews")
-    public ResponseEntity<List<ReviewResponse>> getAllReviewsByRestaurantId(@PathVariable Long restaurantId){
-        List<ReviewResponse> reviewResponseList = reviewService.getAllReviewsByRestaurantId(restaurantId);
-        return new ResponseEntity<>(reviewResponseList, HttpStatus.OK);
     }
 }
