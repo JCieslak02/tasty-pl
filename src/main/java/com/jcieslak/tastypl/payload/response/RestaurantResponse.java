@@ -19,6 +19,6 @@ public class RestaurantResponse {
     private String phoneNumber;
     private String email;
     private long ownerId;
-    private double reviewScore;
+    private double rating;
     private int reviewCount;
 }

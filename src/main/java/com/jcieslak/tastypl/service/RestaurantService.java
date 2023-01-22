@@ -12,6 +12,7 @@ import com.jcieslak.tastypl.mapper.RestaurantMapper;
 import com.jcieslak.tastypl.security.auth.AuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,8 +27,9 @@ public class RestaurantService {
     private final RestaurantMapper restaurantMapper;
     private final AuthService authService;
 
-    public List<RestaurantResponse> getAllRestaurantsResponse(){
-        List<Restaurant> restaurants = restaurantRepository.findAll();
+    public List<RestaurantResponse> getRestaurants(String city, String type, String sort, String direction){
+        Sort order = Sort.by(sort, Direction.);
+        List<Restaurant> restaurants = restaurantRepository.findByAddressCity(city);
         return restaurants.stream()
                 .map(restaurantMapper::toResponse)
                 .toList();
@@ -47,7 +49,7 @@ public class RestaurantService {
         User owner = authService.getPrincipal();
         Restaurant restaurant = restaurantMapper.toEntity(restaurantRequest);
         restaurant.setOwner(owner);
-        restaurant.setReviewScore(0);
+        restaurant.setRating(0);
         restaurant.setReviewCount(0);
 
         //this block takes care of duplicate data that can only belong to one restaurant (db unique const.) or null fields in address
@@ -114,14 +116,14 @@ public class RestaurantService {
     public void updateReviewScoreAndReviewCount(Long restaurantId, int stars, int operationNum){
         Restaurant restaurant = getRestaurantByIdOrThrowExc(restaurantId);
         int reviewCount = restaurant.getReviewCount();
-        double allReviewsAveraged = restaurant.getReviewScore()*reviewCount;
+        double allReviewsAveraged = restaurant.getRating()*reviewCount;
 
         if(operationNum == 1) reviewCount++;
         else if(operationNum == 2) reviewCount--;
 
         double newScore = (allReviewsAveraged + stars) / reviewCount;
 
-        restaurant.setReviewScore(newScore);
+        restaurant.setRating(newScore);
         restaurant.setReviewCount(reviewCount);
     }
 

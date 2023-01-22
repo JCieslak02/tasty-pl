@@ -26,8 +26,7 @@ public class Restaurant {
 
     private String email;
 
-    @Column(name="review_score")
-    private double reviewScore;
+    private double rating;
 
     @Column(name="review_count")
     private int reviewCount;
