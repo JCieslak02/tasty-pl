@@ -1,9 +1,7 @@
 package com.jcieslak.tastypl.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+
 import javax.persistence.*;
 import java.util.Objects;
 
@@ -13,6 +11,7 @@ import java.util.Objects;
 @Getter
 @ToString
 @Table(name="restaurant")
+@AllArgsConstructor
 public class Restaurant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,9 +1,6 @@
 package com.jcieslak.tastypl.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -13,6 +10,7 @@ import java.util.Objects;
 @Setter
 @Getter
 @ToString
+@AllArgsConstructor
 @Table(name="address")
 public class Address {
     @Id

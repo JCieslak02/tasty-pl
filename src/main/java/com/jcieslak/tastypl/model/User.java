@@ -1,10 +1,7 @@
 package com.jcieslak.tastypl.model;
 
 import com.jcieslak.tastypl.enums.UserRole;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +15,7 @@ import java.util.*;
 @Getter
 @ToString
 @Table(name= "user")
+@AllArgsConstructor
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

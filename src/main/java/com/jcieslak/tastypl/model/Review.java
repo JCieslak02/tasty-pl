@@ -1,9 +1,6 @@
 package com.jcieslak.tastypl.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -15,6 +12,7 @@ import java.util.Objects;
 @Getter
 @ToString
 @Table(name="review")
+@AllArgsConstructor
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

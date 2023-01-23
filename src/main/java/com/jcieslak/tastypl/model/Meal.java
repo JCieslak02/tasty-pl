@@ -1,9 +1,6 @@
 package com.jcieslak.tastypl.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -14,6 +11,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
+@AllArgsConstructor
 public class Meal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
