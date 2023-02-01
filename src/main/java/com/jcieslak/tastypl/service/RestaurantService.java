@@ -105,7 +105,7 @@ public class RestaurantService {
         }
 
         //address gets updated in db, called method handles validation
-        addressService.updateAddress(restaurant.getAddress().getId(), newRestaurant.getAddress());
+        addressService.updateRestaurantAddress(restaurant.getAddress().getId(), newRestaurant.getAddress());
 
         restaurant.setName(newRestaurant.getName());
         restaurant.setType(newRestaurant.getType());

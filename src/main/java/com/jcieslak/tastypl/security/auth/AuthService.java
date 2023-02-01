@@ -59,12 +59,12 @@ public class AuthService {
             throw new IllegalArgumentException("Admin role can only be granted to existing users");
         }
 
-        User user = userMapper.toEntity(signupRequest);
+        User user = userMapper.signupToEntity(signupRequest);
         user.setPassword(encoder.encode(signupRequest.getPassword()));
 
         userRepository.save(user);
 
-        return userMapper.toResponse(user);
+        return userMapper.toSignupResponse(user);
     }
 
     // utility method used across services to get current user

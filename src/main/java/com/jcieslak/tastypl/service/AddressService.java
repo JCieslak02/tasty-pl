@@ -28,12 +28,12 @@ public class AddressService {
     }
 
     // this method is used just in RestaurantService to update restaurant's address
-    public void updateAddress(Long id, Address newAddress){
+    public Address updateRestaurantAddress(Long id, Address newAddress){
         // called method takes care of not found exception
         Address address = getAddressById(id);
 
         // no need to do anything if it's the same as in db
-        if(newAddress.equals(address)) return;
+        if(newAddress.equals(address)) return address;
 
         // check if address is owned by another restaurant, nothing wrong will happen if it's owned by restaurant that's being updated,
         // since it's handled in a line above it
@@ -47,7 +47,7 @@ public class AddressService {
         address.setBuildingNumber(newAddress.getBuildingNumber());
         address.setSecondaryNumber(newAddress.getSecondaryNumber());
 
-        addressRepository.save(address);
+        return addressRepository.save(address);
     }
 
     // method used in updateAddress
