@@ -3,6 +3,7 @@ package com.jcieslak.tastypl.mapper;
 import com.jcieslak.tastypl.model.User;
 import com.jcieslak.tastypl.payload.request.SignupRequest;
 import com.jcieslak.tastypl.payload.response.SignUpResponse;
+import com.jcieslak.tastypl.payload.response.UserResponse;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
@@ -16,11 +17,15 @@ public class UserMapper {
                 .addMappings(m -> m.skip(User::setPassword));
     }
 
-    public User toEntity(SignupRequest signupRequest){
+    public User signupToEntity(SignupRequest signupRequest){
         return modelMapper.map(signupRequest, User.class);
     }
 
-    public SignUpResponse toResponse(User user){
+    public SignUpResponse toSignupResponse(User user){
         return modelMapper.map(user, SignUpResponse.class);
+    }
+
+    public UserResponse toUserResponse(User user){
+        return modelMapper.map(user, UserResponse.class);
     }
 }
